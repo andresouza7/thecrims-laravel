@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Interfaces\Buyable;
 use App\Models\Factory;
 use App\Models\User;
+use App\Models\UserFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -48,7 +50,7 @@ class UserService
     /**
      * Sell any Buyable item
      */
-    public function sell(Buyable $item, int $quantity): mixed
+    public function sell(Buyable|Model $item, int $quantity): mixed
     {
         return DB::transaction(function () use ($item, $quantity) {
             $stash = $item->getAmountForUser($this->user);
@@ -77,14 +79,17 @@ class UserService
         });
     }
 
-    public function upgradeFactory(Factory $item): bool
+    public function upgradeFactory(UserFactory $item): bool
     {
         $cost = 2000;
 
         if ($this->user->cash < $cost) return false;
 
         $this->user->decrement('cash', $cost);
-        $item->upgrade($this->user, $cost);
+        $item->update([
+            'level' => DB::raw("level + 1"),
+            'investment' => DB::raw("COALESCE(investment,0)+$cost")
+        ]);
 
         return true;
     }

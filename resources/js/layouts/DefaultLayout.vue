@@ -5,6 +5,8 @@ import { usePage } from '@inertiajs/vue3'
 import { home } from '@/routes'
 import { index as bank } from '@/routes/bank'
 import { index as hooker} from '@/routes/hooker'
+import { index as drug } from '@/routes/drug'
+import { index as factory } from '@/routes/factory'
 
 const page = usePage()
 
@@ -34,6 +36,8 @@ const user = computed(() => page.props.user)
             <Link :href="home()">Home</Link>
             <Link :href="bank()">Bank</Link>
             <Link :href="hooker()">Hookers</Link>
+            <Link :href="drug()">Drugs</Link>
+            <Link :href="factory()">Factories</Link>
         </div>
 
         <div class="p-2">

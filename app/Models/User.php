@@ -58,7 +58,8 @@ class User extends Authenticatable
         'respect',
     ];
 
-    public function career() {
+    public function career()
+    {
         return $this->belongsTo(Career::class);
     }
 
@@ -79,7 +80,7 @@ class User extends Authenticatable
     public function factories()
     {
         return $this->belongsToMany(Factory::class, 'user_factories')
-            ->withPivot(['level', 'investment', 'stash'])
+            ->withPivot(['id', 'level', 'investment', 'stash'])
             ->withTimestamps();
     }
 
@@ -161,9 +162,9 @@ class User extends Authenticatable
         return (int) round(
             (
                 ($this->intelligence * 0.5 +
-                 $this->tolerance * 0.25 +
-                 $this->charisma * 0.1 +
-                 $this->strength * 0.15) * 0.6 * $this->robbery_skill
+                    $this->tolerance * 0.25 +
+                    $this->charisma * 0.1 +
+                    $this->strength * 0.15) * 0.6 * $this->robbery_skill
             ) + $this->armor + $this->weapon
         );
     }
@@ -174,9 +175,9 @@ class User extends Authenticatable
         return (int) round(
             (
                 ($this->intelligence * 0.25 +
-                 $this->tolerance * 0.5 +
-                 $this->charisma * 0.1 +
-                 $this->strength * 0.15) * 0.6 * $this->robbery_skill
+                    $this->tolerance * 0.5 +
+                    $this->charisma * 0.1 +
+                    $this->strength * 0.15) * 0.6 * $this->robbery_skill
             ) + $this->armor + $this->weapon
         );
     }
@@ -188,10 +189,10 @@ class User extends Authenticatable
         return (int) round(
             (
                 ($this->intelligence * 0.05 +
-                 $this->tolerance * 0.25 +
-                 $this->strength * 0.7) / 2
+                    $this->tolerance * 0.25 +
+                    $this->strength * 0.7) / 2
             ) * $this->assault_skill * $vip_bonus
-              + $this->armor + $this->weapon
+                + $this->armor + $this->weapon
         );
     }
 

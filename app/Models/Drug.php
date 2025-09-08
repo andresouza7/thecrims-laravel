@@ -31,7 +31,7 @@ class Drug extends Model implements Buyable
     public function addToUser(Model $user, int $quantity): void
     {
         // Adds or increments amount automatically
-        $user->drugs()->syncWithoutDetaching([
+        $this->users()->syncWithoutDetaching([
             $user->id => ['amount' => DB::raw("COALESCE(amount,0)+$quantity")],
         ]);
     }
@@ -39,14 +39,14 @@ class Drug extends Model implements Buyable
     public function removeFromUser(Model $user, int $quantity): void
     {
         // Decrement pivot amount and remove if zero
-        $row = $user->drugs()->where('user_id', $user->id)->first();
+        $row = $this->users()->where('user_id', $user->id)->first();
 
         if (!$row) return;
 
         $newAmount = $row->pivot->amount - $quantity;
 
         $newAmount > 0
-            ? $user->drugs()->updateExistingPivot($user->id, ['amount' => $newAmount])
-            : $user->drugs()->detach($user->id);
+            ? $this->users()->updateExistingPivot($user->id, ['amount' => $newAmount])
+            : $this->users()->detach($user->id);
     }
 }

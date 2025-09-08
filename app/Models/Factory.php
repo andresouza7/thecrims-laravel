@@ -31,27 +31,17 @@ class Factory extends Model implements Buyable
     public function addToUser(Model $user, int $level = 1, int $investment = 0): void
     {
         // Since each factory is unique, just attach if not already owned
-        $user->factories()->syncWithoutDetaching([
-            $this->id => [
+        $user->factories()->attach(
+            $this->id,
+            [
                 'level' => $level,
                 'investment' => $investment
             ],
-        ]);
+        );
     }
 
-    public function removeFromUser(Model $user, int $quantity = 1): void
+    public function removeFromUser(Model $userFactory, int $quantity): void
     {
-        // Simply detach the factory from the user
-        $user->factories()->detach($this->id);
-    }
-
-    public function upgrade(Model $user, int $cost): void
-    {
-        $user->factories()->syncWithoutDetaching([
-            $this->id => [
-                'level' => DB::raw("level + 1"),
-                'investment' => DB::raw("COALESCE(investment,0)+$cost")
-            ],
-        ]);
+        $userFactory->delete();
     }
 }

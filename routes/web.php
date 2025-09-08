@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\BankController;
+use App\Http\Controllers\DrugController;
+use App\Http\Controllers\FactoryController;
 use App\Http\Controllers\HookerController;
 use App\Models\Boat;
 use App\Models\Component;
@@ -49,6 +51,18 @@ Route::prefix('/hooker')->group(function () {
     Route::get('/', [HookerController::class, 'index'])->name('hooker.index');
     Route::post('/buy/{hooker}', [HookerController::class, 'buyHooker'])->name('hooker.buy');
     Route::post('/sell/{hooker}', [HookerController::class, 'sellHooker'])->name('hooker.sell');
+});
+
+Route::prefix('/drug')->group(function () {
+    Route::get('/', [DrugController::class, 'index'])->name('drug.index');
+    Route::post('/sell/{drug}', [DrugController::class, 'sellDrug'])->name('drug.sell');
+});
+
+Route::prefix('/factory')->group(function () {
+    Route::get('/', [FactoryController::class, 'index'])->name('factory.index');
+    Route::post('/buy/{factory}', [FactoryController::class, 'buyFactory'])->name('factory.buy');
+    Route::post('/sell/{userFactory}', [FactoryController::class, 'sellFactory'])->name('factory.sell');
+    Route::post('/upgrade/{userFactory}', [FactoryController::class, 'upgradeFactory'])->name('factory.upgrade');
 });
 
 Route::get('dashboard', function () {

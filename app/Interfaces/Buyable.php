@@ -29,5 +29,5 @@ interface Buyable
     /**
      * Optional: get the users relationship (pivot)
      */
-    public function users();
+    // public function users();
 }
