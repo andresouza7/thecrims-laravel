@@ -35,21 +35,21 @@ class Hooker extends Model implements Buyable
     {
         // Adds or increments amount automatically
         $user->hookers()->syncWithoutDetaching([
-            $user->id => ['amount' => DB::raw("COALESCE(amount,0)+$quantity")],
+            $this->id => ['amount' => DB::raw("COALESCE(amount,0)+$quantity")],
         ]);
     }
 
     public function removeFromUser(Model $user, int $quantity): void
     {
         // Decrement pivot amount and remove if zero
-        $row = $user->hookers()->where('user_id', $user->id)->first();
+        $row = $user->hookers()->where('hooker_id', $this->id)->first();
 
         if (!$row) return;
 
         $newAmount = $row->pivot->amount - $quantity;
 
         $newAmount > 0
-            ? $user->hookers()->updateExistingPivot($user->id, ['amount' => $newAmount])
-            : $user->hookers()->detach($user->id);
+            ? $user->hookers()->updateExistingPivot($this->id, ['amount' => $newAmount])
+            : $user->hookers()->detach($this->id);
     }
 }

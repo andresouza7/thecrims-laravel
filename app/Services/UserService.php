@@ -12,8 +12,9 @@ class UserService
 {
     protected User $user;
 
-    public function __construct(User $user)
+    public function __construct()
     {
+        $user = User::first();
         $this->user = $user;
     }
 
@@ -33,9 +34,7 @@ class UserService
 
             // valida se usuário tem dinheiro suficiente
             if ($this->user->cash < $cost) {
-                throw ValidationException::withMessages([
-                    'cash' => "You don't have enough cash to buy {$quantity}x {$item->name}.",
-                ]);
+                throw new \RuntimeException("You don't have enough cash to buy {$quantity}x {$item->name}.");
             }
 
             // desconta do usuário
@@ -56,10 +55,14 @@ class UserService
 
             // Valida se tem estoque suficiente
             if (!$stash || $stash < $quantity) {
-                throw ValidationException::withMessages([
-                    'item' => "Not enough of {$item->name} to sell.",
-                ]);
+                throw new \RuntimeException("Not enough of {$item->name} to sell.");
             }
+
+            // if (!$stash || $stash < $quantity) {
+            //     throw ValidationException::withMessages([
+            //         'item' => "Not enough of {$item->name} to sell.",
+            //     ]);
+            // }
 
             $profit = $item->getPrice() * $quantity;
 

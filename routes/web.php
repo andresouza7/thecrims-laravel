@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\BankController;
+use App\Http\Controllers\HookerController;
 use App\Models\Boat;
 use App\Models\Component;
 use App\Models\Drug;
@@ -11,7 +13,7 @@ use App\Services\UserService;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', function () {
+Route::get('/do', function () {
     // return Inertia::render('Welcome');
     $hooker = Hooker::first();
     $user = User::first();
@@ -31,17 +33,27 @@ Route::get('/', function () {
         //throw $th;
     }
     return "home";
+})->name('do');
+
+Route::get('/', function () {
+    return Inertia::render('game/Home');
 })->name('home');
 
-Route::get('/debug', function() {
-    $user = User::first();
+Route::prefix('/bank')->group(function () {
+    Route::get('/', [BankController::class, 'index'])->name('bank.index');
+    Route::post('/deposit', [BankController::class, 'deposit'])->name('bank.deposit');
+    Route::post('/withdraw', [BankController::class, 'withdraw'])->name('bank.withdraw');
+});
 
-    return view('index', compact('user'));
+Route::prefix('/hooker')->group(function () {
+    Route::get('/', [HookerController::class, 'index'])->name('hooker.index');
+    Route::post('/buy/{hooker}', [HookerController::class, 'buyHooker'])->name('hooker.buy');
+    Route::post('/sell/{hooker}', [HookerController::class, 'sellHooker'])->name('hooker.sell');
 });
 
 Route::get('dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+require __DIR__ . '/settings.php';
+require __DIR__ . '/auth.php';
