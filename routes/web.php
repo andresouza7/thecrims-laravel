@@ -15,7 +15,7 @@ Route::get('/', function () {
     // return Inertia::render('Welcome');
     $hooker = Hooker::first();
     $user = User::first();
-    $drug = $user->drugs()->first();
+    $drug = Drug::first();
     // dd($drug->getAmountForUser($user));
     $component = Component::first();
     $factory = Factory::first();
@@ -24,7 +24,8 @@ Route::get('/', function () {
     try {
         //code...
         // DockService::sellDrugOnBoat($drug, $boat, 10);
-        $service->sell($drug, 2);
+        // $service->buy($drug, 20);
+        dd(DockService::getNextBoatBoostInfo($user->boat_profits));
     } catch (\Throwable $th) {
         echo $th->getMessage();
         //throw $th;

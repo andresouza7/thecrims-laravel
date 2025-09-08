@@ -58,6 +58,10 @@ class User extends Authenticatable
         'respect',
     ];
 
+    public function career() {
+        return $this->belongsTo(Career::class);
+    }
+
     public function components()
     {
         return $this->belongsToMany(Component::class, 'user_components')

@@ -18,7 +18,7 @@ class Drug extends Model implements Buyable
 
     public function getAmountForUser(Model $user): int {
         $row = $this->users()->where('user_id', $user->id)->first();
-        return $row->pivot->amount; 
+        return $row ? $row->pivot->amount : 0; 
     }
 
     public function users()
