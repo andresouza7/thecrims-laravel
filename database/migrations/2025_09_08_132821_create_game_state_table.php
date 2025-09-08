@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('boats', function (Blueprint $table) {
+        Schema::create('game_state', function (Blueprint $table) {
             $table->id();
-            $table->integer('day');
-            $table->foreignId('drug_id')->constrained()->cascadeOnDelete();
-            $table->boolean('is_gone')->default(false);
+            $table->integer('current_day');
+            $table->integer('total_days');
+            $table->integer('day_duration_seconds');
             $table->timestamps();
         });
     }
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('boats');
+        Schema::dropIfExists('game_state');
     }
 };

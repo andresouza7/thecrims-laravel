@@ -18,6 +18,12 @@ class Hooker extends Model implements Buyable
         return (int) $this->price;
     }
 
+    public function getAmountForUser(Model $user): int
+    {
+        $row = $this->users()->where('user_id', $user->id)->first();
+        return $row->pivot->amount;
+    }
+
     public function users()
     {
         return $this->belongsToMany(User::class, 'user_hookers')
@@ -36,11 +42,11 @@ class Hooker extends Model implements Buyable
     public function removeFromUser(Model $user, int $quantity): void
     {
         // Decrement pivot amount and remove if zero
-        $pivot = $user->hookers()->where('user_id', $user->id)->first();
+        $row = $user->hookers()->where('user_id', $user->id)->first();
 
-        if (!$pivot) return;
+        if (!$row) return;
 
-        $newAmount = $pivot->pivot->amount - $quantity;
+        $newAmount = $row->pivot->amount - $quantity;
 
         $newAmount > 0
             ? $user->hookers()->updateExistingPivot($user->id, ['amount' => $newAmount])

@@ -24,6 +24,8 @@
     <div>gang_robbery_power: {{$user->gang_robbery_power}}</div>
     <div>assault_power: {{$user->assault_power}}</div>
     <div>respect: {{$user->respect}}</div>
+    <div>boat_profits: {{$user->boat_profits}}</div>
+    <div>drug_profits: {{$user->drug_profits}}</div>
     
     @foreach ($user->hookers as $hooker)
         <div>{{ $hooker->name }}, amount: {{ $hooker->pivot->amount }}</div>

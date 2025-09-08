@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Interfaces\Buyable;
 use App\Models\Factory;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class UserService
 {
@@ -24,33 +26,52 @@ class UserService
     /**
      * Buy or reward any Buyable item
      */
-    public function buy(Buyable $item, int $quantity = 1): bool
+    public function buy(Buyable $item, int $quantity = 1): mixed
     {
-        $cost = $item->getPrice() * $quantity;
+        return DB::transaction(function () use ($item, $quantity) {
+            $cost = $item->getPrice() * $quantity;
 
-        if ($this->user->cash < $cost) return false;
-        $this->user->decrement('cash', $cost);
+            // valida se usuário tem dinheiro suficiente
+            if ($this->user->cash < $cost) {
+                throw ValidationException::withMessages([
+                    'cash' => "You don't have enough cash to buy {$quantity}x {$item->name}.",
+                ]);
+            }
 
-        $item->addToUser($this->user, $quantity);
+            // desconta do usuário
+            $this->user->decrement('cash', $cost);
 
-        return true;
+            // adiciona item ao usuário
+            $item->addToUser($this->user, $quantity);
+        });
     }
 
     /**
      * Sell any Buyable item
      */
-    public function sell(Buyable $item, int $quantity): bool
+    public function sell(Buyable $item, int $quantity): mixed
     {
-        $pivot = $item->users()->where('user_id', $this->user->id)->first();
+        return DB::transaction(function () use ($item, $quantity) {
+            $stash = $item->getAmountForUser($this->user);
 
-        if (!$pivot || $pivot->pivot->amount < $quantity) return false;
+            // Valida se tem estoque suficiente
+            if (!$stash || $stash < $quantity) {
+                throw ValidationException::withMessages([
+                    'item' => "Not enough of {$item->name} to sell.",
+                ]);
+            }
 
-        $profit = $item->getPrice() * $quantity;
-        $this->user->increment('cash', $profit);
+            $profit = $item->getPrice() * $quantity;
 
-        $item->removeFromUser($this->user, $quantity);
+            // incrementa o cash do usuário
+            $this->user->increment('cash', $profit);
 
-        return true;
+            // remove item do usuário
+            $item->removeFromUser($this->user, $quantity);
+
+            // update player stats
+            $this->user->increment('drug_profits', $profit);
+        });
     }
 
     public function upgradeFactory(Factory $item): bool

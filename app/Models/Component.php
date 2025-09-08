@@ -10,10 +10,16 @@ use Illuminate\Support\Facades\DB;
 class Component extends Model implements Buyable
 {
     use HasFactory;
-    
+
     public function getPrice(): int
     {
         return (int) $this->price;
+    }
+
+    public function getAmountForUser(Model $user): int
+    {
+        $row = $this->users()->where('user_id', $user->id)->first();
+        return $row->pivot->amount;
     }
 
     public function users()
@@ -34,11 +40,11 @@ class Component extends Model implements Buyable
     public function removeFromUser(Model $user, int $quantity): void
     {
         // Decrement pivot amount and remove if zero
-        $pivot = $user->components()->where('user_id', $user->id)->first();
+        $row = $user->components()->where('user_id', $user->id)->first();
 
-        if (!$pivot) return;
+        if (!$row) return;
 
-        $newAmount = $pivot->pivot->amount - $quantity;
+        $newAmount = $row->pivot->amount - $quantity;
 
         $newAmount > 0
             ? $user->components()->updateExistingPivot($user->id, ['amount' => $newAmount])

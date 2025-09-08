@@ -16,6 +16,11 @@ class Factory extends Model implements Buyable
         return (int) $this->price;
     }
 
+    public function getAmountForUser(Model $user): int
+    {
+        return $this->users()->where('user_id', $user->id)->count();
+    }
+
     public function users()
     {
         return $this->belongsToMany(User::class, 'user_factories')

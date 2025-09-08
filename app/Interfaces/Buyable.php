@@ -12,6 +12,11 @@ interface Buyable
     public function getPrice(): int;
 
     /**
+     * Get the amount of the item
+     */
+    public function getAmountForUser(Model $user): int;
+
+    /**
      * Add a quantity of this item to a user
      */
     public function addToUser(Model $user, int $quantity): void;
