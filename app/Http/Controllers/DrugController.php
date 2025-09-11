@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Drug;
 use App\Models\User;
+use App\Services\MarketService;
 use App\Services\UserService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -18,7 +19,7 @@ class DrugController extends Controller
         return Inertia::render('game/Drug', ['drugs' => $drugs]);
     }
 
-    public function sellDrug(Drug $drug, Request $request, UserService $service)
+    public function sellDrug(Drug $drug, Request $request, MarketService $service)
     {
         $request->validate([
             'amount' => 'required'

@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Interfaces\Buyable;
+use App\Interfaces\Sellable;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
@@ -10,14 +12,19 @@ use Illuminate\Support\Facades\DB;
  */
 class MarketService
 {
-    public function __construct(
-        protected User $user
-    ) {}
+    // public function __construct(protected User $user) {}
+    protected User $user;
+
+    public function __construct()
+    {
+        $user = User::first();
+        $this->user = $user;
+    }
 
     public function buy(Buyable $item, int $quantity = 1): mixed
     {
         return DB::transaction(function () use ($item, $quantity) {
-            $cost = $this->calculateTotal($item, $quantity);
+            $cost = $item->getPrice() * $quantity;
 
             $this->validateFunds($cost);
             $this->adjustCash(-$cost);
@@ -31,9 +38,9 @@ class MarketService
     public function sell(Sellable $item, int $quantity = 1): mixed
     {
         return DB::transaction(function () use ($item, $quantity) {
-            $this->validateInventory($item, $quantity);
+            $item->validateInventory($this->user, $quantity);
 
-            $profit = $this->calculateTotal($item, $quantity);
+            $profit = $item->getPrice() * $quantity;
 
             $this->adjustCash($profit);
             $item->removeFromUser($this->user, $quantity);
@@ -44,25 +51,10 @@ class MarketService
         });
     }
 
-    protected function calculateTotal(Item $item, int $quantity): int
-    {
-        return $item->getPrice() * $quantity;
-    }
-
     protected function validateFunds(int $cost): void
     {
         if ($this->user->cash < $cost) {
             throw new \RuntimeException("Not enough cash.");
-        }
-    }
-
-    protected function validateInventory(Sellable $item, int $quantity): void
-    {
-        if ($item instanceof StackableItem) {
-            $stash = $item->getAmountForUser($this->user);
-            if (!$stash || $stash < $quantity) {
-                throw new \RuntimeException("Not enough of {$item->name} to sell.");
-            }
         }
     }
 

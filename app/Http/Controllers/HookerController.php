@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Hooker;
 use App\Models\User;
+use App\Services\MarketService;
 use App\Services\UserService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -19,7 +20,7 @@ class HookerController
         return Inertia::render('game/Hooker', ['hookers' => $hookers, 'owned' => $owned]);
     }
 
-    public function buyHooker(Hooker $hooker, Request $request, UserService $service)
+    public function buyHooker(Hooker $hooker, Request $request, MarketService $service)
     {
         $request->validate([
             'amount' => 'required'
@@ -33,7 +34,7 @@ class HookerController
         }
     }
 
-    public function sellHooker(Hooker $hooker, Request $request, UserService $service)
+    public function sellHooker(Hooker $hooker, Request $request, MarketService $service)
     {
         $request->validate([
             'amount' => 'required'

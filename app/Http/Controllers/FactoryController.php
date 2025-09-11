@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Factory;
 use App\Models\User;
 use App\Models\UserFactory;
+use App\Services\MarketService;
 use App\Services\UserService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -21,7 +22,7 @@ class FactoryController extends Controller
         return Inertia::render('game/Factory', ['factories' => $factories, 'owned' => $owned]);
     }
 
-    public function buyFactory(Factory $factory, UserService $service)
+    public function buyFactory(Factory $factory, MarketService $service)
     {
         try {
             $service->buy($factory);
@@ -31,7 +32,7 @@ class FactoryController extends Controller
         }
     }
 
-    public function sellFactory(UserFactory $userFactory, UserService $service)
+    public function sellFactory(UserFactory $userFactory, MarketService $service)
     {
         try {
             $service->sell($userFactory);

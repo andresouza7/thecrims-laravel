@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
-use App\Interfaces\UniqueItem;
+use App\Interfaces\Buyable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class Factory extends Model
+class Factory extends Model implements Buyable
 {
     use HasFactory;
 
@@ -16,22 +16,25 @@ class Factory extends Model
         return (int) $this->price;
     }
 
-    public function users()
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'user_factories')
             ->withPivot(['level', 'investment', 'stash'])
             ->withTimestamps();
     }
 
-    public function addToUser(Model $user): void
+    public function addToUser(User $user, int $quantity = 1): void
     {
-        // Since each factory is unique, just attach if not already owned
-        $user->factories()->attach(
-            $this->id,
-            [
-                'level' => 1,
-                'investment' => $this->price
-            ],
-        );
+        // Each factory is unique → just attach once
+        $user->factories()->attach($this->id, [
+            'level' => 1,
+            'investment' => $this->price,
+        ]);
     }
 }
+
