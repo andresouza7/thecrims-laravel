@@ -22,7 +22,7 @@ class GameService
     {
         $game = self::getGameData();
 
-        if (!$game) {
+        if (!$game || $game->current_day == $game->total_days) {
             return '00:00';
         }
 
@@ -61,9 +61,19 @@ class GameService
             ]
         );
 
-        // User::update([
+        User::query()->update([
+            'cash' => 100000,
+            'bank' => 0,
+            'hooker_profits' => 0,
+            'drug_profits' => 0,
+            'boat_profits' => 0,
+            'factory_profits' => 0,
+            'strength' => 0,
+            'intelligence' => 0,
+            'charisma' => 0,
+            'tolerance' => 0,
 
-        // ]);
+        ]);
     }
 
     public static function getGameData()

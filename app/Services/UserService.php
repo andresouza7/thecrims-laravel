@@ -60,7 +60,10 @@ class UserService
     public function collectFactoryProduction()
     {
         $userId = $this->user->id;
-        $production = UserFactory::where('user_id', $userId)->where('stash', '>', 0)->exists();
+
+        $production = UserFactory::where('user_id', $userId)
+            ->where('stash', '>', 0)
+            ->exists();
 
         if (!$production) {
             throw new \RuntimeException("Nothing to collect.");
@@ -76,9 +79,8 @@ class UserService
             FROM user_factories uf
             JOIN factories f ON f.id = uf.factory_id
             WHERE uf.user_id = ? AND uf.stash > 0
-            ON CONFLICT (user_id, drug_id)
-            DO UPDATE SET
-                amount = user_drugs.amount + EXCLUDED.amount
+            ON DUPLICATE KEY UPDATE
+                amount = amount + VALUES(amount)
         ", [$userId]);
 
             DB::statement("
@@ -96,8 +98,6 @@ class UserService
         if (!$income || $income == 0) {
             throw new \RuntimeException("Nothing to collect.");
         }
-
-        return;
 
         $this->user->increment('cash', $income);
         $this->user->increment('hooker_profits', $income);

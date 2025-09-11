@@ -47,8 +47,8 @@ Route::get('/', function () {
 
 Route::get('/info', function (GameService $game) {
     return response()->json([
-        'day'  => $game->getGameDay(),
-        'time' => $game->getGameTime(),
+        'day'  => $game::getGameDay(),
+        'time' => $game::getGameTime(),
     ]);
 })->name('info');
 

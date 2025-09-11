@@ -7,37 +7,12 @@ import { index as bank } from '@/routes/bank'
 import { indexs as hooker} from '@/routes/hooker'
 import { index as drug } from '@/routes/drug'
 import { index as factory } from '@/routes/factory'
+import { useGameInfo } from '@/composables/useGameInfo'
 
 const page = usePage()
 const user = computed(() => page.props.user)
 
-// reactive state for game info
-const gameDay = ref(0)
-const gameTime = ref('00:00')
-let intervalId = null
-
-// function to fetch /info
-const fetchGameInfo = async () => {
-    try {
-        const res = await fetch('/info')
-        const data = await res.json()
-        gameDay.value = data.day
-        gameTime.value = data.time
-    } catch (error) {
-        console.error('Failed to fetch game info', error)
-    }
-}
-
-// start the interval when component mounts
-onMounted(() => {
-    fetchGameInfo() // initial fetch
-    intervalId = setInterval(fetchGameInfo, 2000) // every 2 seconds
-})
-
-// clear the interval on unmount
-onBeforeUnmount(() => {
-    clearInterval(intervalId)
-})
+const { gameDay, gameTime } = useGameInfo()
 </script>
 
 <template>
