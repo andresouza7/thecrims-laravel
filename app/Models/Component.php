@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
-use App\Interfaces\Buyable;
+use App\Interfaces\StackableItem;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
-class Component extends Model implements Buyable
+class Component extends Model implements StackableItem
 {
     use HasFactory;
 

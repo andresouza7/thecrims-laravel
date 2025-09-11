@@ -4,7 +4,7 @@ namespace App\Interfaces;
 
 use Illuminate\Database\Eloquent\Model;
 
-interface Buyable
+interface StackableItem
 {
     /**
      * Get the price of the item
@@ -29,5 +29,5 @@ interface Buyable
     /**
      * Optional: get the users relationship (pivot)
      */
-    // public function users();
+    public function users();
 }

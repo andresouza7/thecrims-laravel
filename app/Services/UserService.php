@@ -2,7 +2,8 @@
 
 namespace App\Services;
 
-use App\Interfaces\Buyable;
+use App\Interfaces\StackableItem;
+use App\Interfaces\UniqueItem;
 use App\Models\Factory;
 use App\Models\User;
 use App\Models\UserFactory;
@@ -20,16 +21,16 @@ class UserService
         $this->user = $user;
     }
 
-    public function rewardItem(Buyable $item, int $quantity): bool
+    public function rewardItem(StackableItem $item, int $quantity): bool
     {
         $item->addToUser($this->user, $quantity);
         return true;
     }
 
     /**
-     * Buy or reward any Buyable item
+     * Buy or reward any StackableItem item
      */
-    public function buy(Buyable $item, int $quantity = 1): mixed
+    public function buy(Model|StackableItem $item, int $quantity = 1): mixed
     {
         return DB::transaction(function () use ($item, $quantity) {
             $cost = $item->getPrice() * $quantity;
@@ -43,28 +44,25 @@ class UserService
             $this->user->decrement('cash', $cost);
 
             // adiciona item ao usuário
-            $item->addToUser($this->user, $quantity);
+            if ($item instanceof StackableItem) $item->addToUser($this->user, $quantity);
+            if ($item instanceof Model) $item->addToUser($this->user, $item);
         });
     }
 
     /**
-     * Sell any Buyable item
+     * Sell any StackableItem item
      */
-    public function sell(Buyable|Model $item, int $quantity): mixed
+    public function sell(UniqueItem|StackableItem $item, int $quantity = 1): mixed
     {
         return DB::transaction(function () use ($item, $quantity) {
-            $stash = $item->getAmountForUser($this->user);
+            if ($item instanceof StackableItem) {
+                $stash = $item->getAmountForUser($this->user);
 
-            // Valida se tem estoque suficiente
-            if (!$stash || $stash < $quantity) {
-                throw new \RuntimeException("Not enough of {$item->name} to sell.");
+                // Valida se tem estoque suficiente
+                if (!$stash || $stash < $quantity) {
+                    throw new \RuntimeException("Not enough of {$item->name} to sell.");
+                }
             }
-
-            // if (!$stash || $stash < $quantity) {
-            //     throw ValidationException::withMessages([
-            //         'item' => "Not enough of {$item->name} to sell.",
-            //     ]);
-            // }
 
             $profit = $item->getPrice() * $quantity;
 
@@ -72,24 +70,22 @@ class UserService
             $this->user->increment('cash', $profit);
 
             // remove item do usuário
-            $item->removeFromUser($this->user, $quantity);
+            if ($item instanceof UniqueItem) $item->removeFromUser($item->id);
+            if ($item instanceof StackableItem) $item->removeFromUser($this->user, $quantity);
 
             // update player stats
             $this->user->increment('drug_profits', $profit);
         });
     }
 
-    public function upgradeFactory(UserFactory $item): bool
+    public function upgradeFactory(UserFactory $userFactory): bool
     {
         $cost = 2000;
 
         if ($this->user->cash < $cost) return false;
 
         $this->user->decrement('cash', $cost);
-        $item->update([
-            'level' => DB::raw("level + 1"),
-            'investment' => DB::raw("COALESCE(investment,0)+$cost")
-        ]);
+        $userFactory->levelUp($cost);
 
         return true;
     }

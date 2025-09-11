@@ -2,10 +2,11 @@
 
 namespace App\Models;
 
-use App\Interfaces\Buyable;
+use App\Interfaces\StackableItem;
+use App\Interfaces\UniqueItem;
 use Illuminate\Database\Eloquent\Model;
 
-class UserFactory extends Model implements Buyable
+class UserFactory extends Model implements UniqueItem
 {
     protected $fillable =[
         'user_id',
@@ -23,21 +24,19 @@ class UserFactory extends Model implements Buyable
         return $this->belongsTo(Factory::class);
     }
 
-    public function getPrice(): int {
-        return $this->factory->price;
-    }
-
-    public function getAmountForUser(Model $user): int {
-        return 1;
-    }
-
-    public function addToUser(Model $user, int $quantity): void
+    public function getPrice(): int
     {
-        
+        return (int) $this->factory->price;
     }
 
-    public function removeFromUser(Model $user, int $quantity): void
+    public function removeFromUser(): void
     {
         $this->delete();
+    }
+
+    public function levelUp(int $cost)
+    {
+        $this->increment('level', 1);
+        $this->increment('investment', $cost);
     }
 }

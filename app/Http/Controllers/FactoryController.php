@@ -24,7 +24,7 @@ class FactoryController extends Controller
     public function buyFactory(Factory $factory, UserService $service)
     {
         try {
-            $service->buy($factory, 1);
+            $service->buy($factory);
             return redirect()->back()->with('message', 'fabrica comprada!');
         } catch (\Throwable $th) {
             return redirect()->back()->with('error', $th->getMessage());
@@ -34,7 +34,7 @@ class FactoryController extends Controller
     public function sellFactory(UserFactory $userFactory, UserService $service)
     {
         try {
-            $service->sell($userFactory, 1);
+            $service->sell($userFactory);
             return redirect()->back()->with('message', 'fabrica vendida!');
         } catch (\Throwable $th) {
             return redirect()->back()->with('error', $th->getMessage());
