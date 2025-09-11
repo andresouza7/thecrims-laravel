@@ -18,7 +18,7 @@ class ComponentFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->randomElement(['hash', 'weed seed', 'analgesics']),
+            'name' => fake()->unique()->lexify('component_???'),
             'drug_id' => Drug::inRandomOrder()->value('id'),
         ];
     }

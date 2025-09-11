@@ -1,14 +1,24 @@
 <script setup>
-import { Form } from '@inertiajs/vue3'
-import { buy } from '@/routes/hooker';
-import { sell } from '@/routes/hooker';
+import { Form, usePage } from '@inertiajs/vue3'
+import { buy, sell, collect } from '@/routes/hooker';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
+import { computed } from 'vue';
 defineProps(['hookers', 'owned']);
+
+const page = usePage()
+
+const user = computed(() => page.props.user)
 
 </script>
 
 <template>
     <DefaultLayout>
+        <p class="text-xl font-semibold mb-4">Available income</p>
+        <div>{{ user.hooker_income }}</div>
+        <Form :action="collect()" method="post" class="w-full" :options="{ preserveScroll: true }">
+            <button type="submit" class="bg-red-500 text-white py-1 w-full rounded hover:bg-red-600">Coletar</button>
+        </Form>
+
         <p class="text-xl font-semibold mb-4">Owned Hookers</p>
 
         <!-- Owned items grid -->
@@ -19,9 +29,10 @@ defineProps(['hookers', 'owned']);
                     <img :src="owned.avatar" alt="" class="w-24 h-24 object-cover rounded mb-2" />
                 </a> -->
                 <h3 class="font-medium mb-1">{{ owned.name }}</h3>
-                <p class="text-sm text-gray-600 mb-2">Owned: {{ owned.pivot.amount }}</p>
+                <p class="text-sm text-gray-600 mb-2">Owned: {{ owned.pivot?.amount }}</p>
+                <p class="text-sm text-gray-600 mb-2">Earning: {{ owned.pivot?.amount * owned.income }}</p>
 
-                <Form :action="sell(owned.id)" method="post" class="w-full" :options="{preserveScroll: true}">
+                <Form :action="sell(owned.id)" method="post" class="w-full" :options="{ preserveScroll: true }">
                     <input type="number" name="amount" min="1" placeholder="Quantity" class="border p-2 w-full mb-2" />
                     <button type="submit"
                         class="bg-red-500 text-white py-1 w-full rounded hover:bg-red-600">Sell</button>
@@ -41,6 +52,7 @@ defineProps(['hookers', 'owned']);
                 </a> -->
                 <h3 class="font-medium mb-1">{{ hooker.name }}</h3>
                 <p class="text-sm text-gray-600 mb-2">Price: {{ hooker.price }}</p>
+                <p class="text-sm text-gray-600 mb-2">Income: {{ hooker.income }}</p>
 
                 <Form :action="buy(hooker.id)" method="post" class="w-full">
                     <input type="number" name="amount" min="1" placeholder="Quantity" class="border p-2 w-full mb-2" />

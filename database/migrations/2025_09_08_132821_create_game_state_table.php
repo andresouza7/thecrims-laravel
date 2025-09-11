@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->integer('current_day');
             $table->integer('total_days');
-            $table->integer('day_duration_seconds');
+            $table->unsignedInteger('start_time');
             $table->timestamps();
         });
     }

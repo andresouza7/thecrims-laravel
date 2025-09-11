@@ -47,4 +47,13 @@ class HookerController
             return redirect()->back()->with('error', $th->getMessage());
         }
     }
+
+    public function collectIncome(UserService $service) {
+        try {
+            $service->collectHookerIncome();
+            return redirect()->back()->with('message', 'dinheiro coletado!');
+        } catch (\Throwable $th) {
+            return redirect()->back()->with('error', $th->getMessage());
+        }
+    }
 }

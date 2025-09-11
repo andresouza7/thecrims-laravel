@@ -59,4 +59,13 @@ class FactoryController extends Controller
             return redirect()->back()->with('error', $th->getMessage());
         }
     }
+
+    public function collectProduction(UserService $service) {
+        try {
+            $service->collectFactoryProduction();
+            return redirect()->back()->with('message', 'produção coletada!');
+        } catch (\Throwable $th) {
+            return redirect()->back()->with('error', $th->getMessage());
+        }
+    }
 }

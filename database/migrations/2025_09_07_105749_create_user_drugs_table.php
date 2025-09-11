@@ -17,6 +17,8 @@ return new class extends Migration
             $table->foreignId('drug_id')->constrained()->cascadeOnDelete();
             $table->unsignedBigInteger('amount')->default(0);
             $table->timestamps();
+
+            $table->unique(['user_id', 'drug_id'], 'user_drugs_user_drug_unique');
         });
     }
 

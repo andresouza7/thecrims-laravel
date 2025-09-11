@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\BankController;
 use App\Http\Controllers\DrugController;
 use App\Http\Controllers\FactoryController;
@@ -11,9 +12,12 @@ use App\Models\Factory;
 use App\Models\Hooker;
 use App\Models\User;
 use App\Services\DockService;
+use App\Services\GameService;
 use App\Services\UserService;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+
+use function Pest\Laravel\json;
 
 Route::get('/do', function () {
     // return Inertia::render('Welcome');
@@ -41,6 +45,18 @@ Route::get('/', function () {
     return Inertia::render('game/Home');
 })->name('home');
 
+Route::get('/info', function (GameService $game) {
+    return response()->json([
+        'day'  => $game->getGameDay(),
+        'time' => $game->getGameTime(),
+    ]);
+})->name('info');
+
+Route::prefix('/admin')->group(function () {
+    Route::get('/', [AdminController::class, 'index'])->name('admin.index');
+    Route::post('/round', [AdminController::class, 'createRound'])->name('admin.round');
+});
+
 Route::prefix('/bank')->group(function () {
     Route::get('/', [BankController::class, 'index'])->name('bank.index');
     Route::post('/deposit', [BankController::class, 'deposit'])->name('bank.deposit');
@@ -48,9 +64,10 @@ Route::prefix('/bank')->group(function () {
 });
 
 Route::prefix('/hooker')->group(function () {
-    Route::get('/', [HookerController::class, 'index'])->name('hooker.index');
+    Route::get('/', [HookerController::class, 'index'])->name('hooker.indexs');
     Route::post('/buy/{hooker}', [HookerController::class, 'buyHooker'])->name('hooker.buy');
     Route::post('/sell/{hooker}', [HookerController::class, 'sellHooker'])->name('hooker.sell');
+    Route::post('/collect', [HookerController::class, 'collectIncome'])->name('hooker.collect');
 });
 
 Route::prefix('/drug')->group(function () {
@@ -64,6 +81,7 @@ Route::prefix('/factory')->group(function () {
     Route::post('/buy/{factory}', [FactoryController::class, 'buyFactory'])->name('factory.buy');
     Route::post('/sell/{userFactory}', [FactoryController::class, 'sellFactory'])->name('factory.sell');
     Route::post('/upgrade/{userFactory}', [FactoryController::class, 'upgradeFactory'])->name('factory.upgrade');
+    Route::post('/collect', [FactoryController::class, 'collectProduction'])->name('factory.collect');
 });
 
 Route::get('dashboard', function () {

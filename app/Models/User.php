@@ -56,6 +56,7 @@ class User extends Authenticatable
         'gang_robbery_power',
         'assault_power',
         'respect',
+        'hooker_income'
     ];
 
     public function career()
@@ -204,5 +205,10 @@ class User extends Authenticatable
                 ($this->intelligence + $this->strength + $this->charisma + $this->tolerance) / 8
             ) + ($this->cash / 30000)
         );
+    }
+
+    public function getHookerIncomeAttribute(): int
+    {
+        return $this->hookers->sum(fn($h) => $h->pivot->available_income);
     }
 }
