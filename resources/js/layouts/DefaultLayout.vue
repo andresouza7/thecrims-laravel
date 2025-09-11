@@ -7,7 +7,6 @@ import { index as bank } from '@/routes/bank'
 import { index as hooker} from '@/routes/hooker'
 import { index as drug } from '@/routes/drug'
 import { index as factory } from '@/routes/factory'
-
 const page = usePage()
 
 const user = computed(() => page.props.user)

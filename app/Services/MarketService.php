@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Interfaces\Buyable;
 use App\Interfaces\Sellable;
 use App\Models\User;
+use App\Models\UserFactory;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -61,5 +62,20 @@ class MarketService
     protected function adjustCash(int $amount): void
     {
         $this->user->increment('cash', $amount);
+    }
+
+    public function rewardItem(Buyable $item, int $quantity): void
+    {
+        $item->addToUser($this->user, $quantity);
+    }
+
+    public function upgradeFactory(UserFactory $userFactory): void
+    {
+        $cost = 2000;
+
+        $this->validateFunds($cost);
+
+        $this->user->decrement('cash', $cost);
+        $userFactory->levelUp($cost);
     }
 }

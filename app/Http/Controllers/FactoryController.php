@@ -22,6 +22,14 @@ class FactoryController extends Controller
         return Inertia::render('game/Factory', ['factories' => $factories, 'owned' => $owned]);
     }
 
+    public function showFactory(UserFactory $userFactory)
+    {
+        $userFactory->load('factory');
+        $userFactory->load('factory.drug');
+
+        return Inertia::render('game/Lab', ['lab' => $userFactory]);
+    }
+
     public function buyFactory(Factory $factory, MarketService $service)
     {
         try {
@@ -42,7 +50,7 @@ class FactoryController extends Controller
         }
     }
 
-    public function upgradeFactory(UserFactory $userFactory, UserService $service)
+    public function upgradeFactory(UserFactory $userFactory, MarketService $service)
     {
         try {
             $service->upgradeFactory($userFactory);

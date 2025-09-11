@@ -1,7 +1,8 @@
 <script setup>
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { Form } from '@inertiajs/vue3';
-import { buy, sell, upgrade } from '@/routes/factory';
+import { buy, sell, upgrade, show } from '@/routes/factory';
+import { Link } from '@inertiajs/vue3'
 
 const props = defineProps(['factories', 'owned']);
 console.log(props.owned)
@@ -23,7 +24,9 @@ console.log(props.owned)
                             <img :src="owned.avatar || `https://picsum.photos/seed/${owned.id}/48`" alt=""
                                 class="w-12 h-12 rounded-full object-cover">
                             <div>
-                                <h3 class="font-medium">{{ owned.name }}</h3>
+                                <h3 class="font-medium">
+                                    <Link :href="show(owned.pivot.id)">{{ owned.name }}</Link>
+                                </h3>
                                 <p class="text-gray-300">Level: {{ owned.pivot.level }}</p>
                             </div>
                         </div>

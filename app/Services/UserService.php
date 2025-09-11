@@ -22,24 +22,6 @@ class UserService
         $this->user = $user;
     }
 
-    public function rewardItem(Buyable $item, int $quantity): bool
-    {
-        $item->addToUser($this->user, $quantity);
-        return true;
-    }
-
-    public function upgradeFactory(UserFactory $userFactory): bool
-    {
-        $cost = 2000;
-
-        if ($this->user->cash < $cost) return false;
-
-        $this->user->decrement('cash', $cost);
-        $userFactory->levelUp($cost);
-
-        return true;
-    }
-
     /**
      * Deposit cash into bank
      */

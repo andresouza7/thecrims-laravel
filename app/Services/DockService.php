@@ -117,11 +117,11 @@ class DockService
         ];
     }
 
-    public static function sellDrugOnBoat(Drug $drug, Boat $boat, int $amount): void
+    public static function sellDrugOnBoat(Drug $drug, Boat $boat, int $amount, MarketService $service): void
     {
         $user = User::first();
 
-        DB::transaction(function () use ($user, $drug, $boat, $amount) {
+        DB::transaction(function () use ($user, $drug, $boat, $amount, $service) {
             // Validate that boat day matches current day
             // $currentDay = DB::table('game_state')->value('current_day');
             $currentDay = 3;
@@ -133,9 +133,7 @@ class DockService
 
             // Calculate profits
             $profits = $drug->price * $amount;
-
-            $userService = new UserService($user);
-            $userService->sell($drug, $amount);
+            $service->sell($drug, $amount);
 
             // Update player stats
             $user->increment('boat_profits', $profits);
