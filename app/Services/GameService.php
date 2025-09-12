@@ -188,7 +188,7 @@ class GameService
 
     protected static function markBoatsGone(int $currentDay)
     {
-        Boat::where('day', $currentDay)->update(['is_gone' => true]);
+        Boat::where('day', $currentDay - 1)->update(['is_gone' => true]);
     }
 
     protected static function resetDealerTransactions()

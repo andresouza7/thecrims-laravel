@@ -4,12 +4,21 @@ namespace App\Services;
 
 use App\Models\Boat;
 use App\Models\Drug;
+use App\Models\GameState;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class DockService
 {
+    public User $user;
+
+    public function __construct()
+    {
+        $user = User::first();
+        $this->user = $user;
+    }
+
     protected static array $boosts = [
         ['label' => 'Iniciante', 'min' => 0, 'max' => 9999, 'multiplier' => 1.1],
         ['label' => 'Veterano das Docas', 'min' => 10000, 'max' => 99999, 'multiplier' => 1.2],
@@ -70,11 +79,7 @@ class DockService
     {
         $user = User::first();
 
-        // Current game day
-        // $currentDay = Boat::query()
-        //     ->selectRaw('MAX(day) as current_day') 
-        //     ->value('current_day');
-        $currentDay = 3;
+        $currentDay = GameService::getGameDay();
 
         // Current boat with drug
         $currentBoat = Boat::with('drug') // assuming Boat has belongsTo(Drug::class, 'drug_id', 'id')
@@ -84,7 +89,7 @@ class DockService
             ->first();
 
         // Owned amount
-        $ownedAmount = $currentBoat->drug->getAmountForUser($user);
+        $ownedAmount = $currentBoat ? $currentBoat->drug->getAmountForUser($user) : 0;
 
         // Next boat
         $nextBoat = Boat::with('drug')
@@ -117,14 +122,15 @@ class DockService
         ];
     }
 
-    public static function sellDrugOnBoat(Drug $drug, Boat $boat, int $amount, MarketService $service): void
+    public function sellToBoat(Boat $boat, int $amount, MarketService $service): void
     {
-        $user = User::first();
+        $user = $this->user;
 
-        DB::transaction(function () use ($user, $drug, $boat, $amount, $service) {
+        DB::transaction(function () use ($user, $boat, $amount, $service) {
             // Validate that boat day matches current day
             // $currentDay = DB::table('game_state')->value('current_day');
-            $currentDay = 3;
+            $currentDay = GameService::getGameDay();
+            
             if ($boat->day !== $currentDay) {
                 throw ValidationException::withMessages([
                     'boat' => "Boat day {$boat->day} does not match current game day {$currentDay}.",
@@ -132,8 +138,8 @@ class DockService
             }
 
             // Calculate profits
-            $profits = $drug->price * $amount;
-            $service->sell($drug, $amount);
+            $profits = $boat->drug->price * $amount;
+            $service->sell($boat->drug, $amount);
 
             // Update player stats
             $user->increment('boat_profits', $profits);

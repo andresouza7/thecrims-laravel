@@ -8,6 +8,7 @@ import { indexs as hooker } from '@/routes/hooker'
 import { index as drug } from '@/routes/drug'
 import { index as factory } from '@/routes/factory'
 import { index as nightclub } from '@/routes/nightclub'
+import { index as boat } from '@/routes/boat'
 import { useGameInfo } from '@/composables/useGameInfo'
 
 const page = usePage()
@@ -113,6 +114,7 @@ const { gameDay, gameTime } = useGameInfo()
             <Link :href="hooker()">Hookers</Link>
             <Link :href="drug()">Drugs</Link>
             <Link :href="factory()">Factories</Link>
+            <Link :href="boat()">Docks</Link>
             <Link href="/admin">Admin</Link>
         </div>
 

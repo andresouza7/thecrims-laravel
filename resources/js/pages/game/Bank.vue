@@ -28,7 +28,8 @@ let amount = 0;
                     class="flex-1 p-2 rounded border border-gray-500 bg-gray-800 text-white text-center focus:outline-none focus:ring-2 focus:ring-blue-400" />
 
                 <!-- Deposit -->
-                <Form :action="deposit()" method="post" class="flex-1"  :transform="data => ({ amount: amount === 0 ? user.cash : amount})">
+                <Form :action="deposit()" method="post" class="flex-1"
+                    :transform="data => ({ amount: amount === 0 ? user.cash : amount })">
                     <input type="hidden" name="amount" :value="amount" />
                     <button type="submit"
                         class="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded font-semibold transition">
@@ -37,7 +38,8 @@ let amount = 0;
                 </Form>
 
                 <!-- Withdraw -->
-                <Form :action="withdraw()" method="post" class="flex-1" :transform="data => ({ amount: amount === 0 ? user.bank : amount})">
+                <Form :action="withdraw()" method="post" class="flex-1"
+                    :transform="data => ({ amount: amount === 0 ? user.bank : amount })">
                     <input type="hidden" name="amount" :value="amount" />
                     <button type="submit"
                         class="w-full bg-yellow-600 hover:bg-yellow-700 py-2 rounded font-semibold transition">

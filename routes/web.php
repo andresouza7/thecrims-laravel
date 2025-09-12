@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\BankController;
+use App\Http\Controllers\BoatController;
 use App\Http\Controllers\DrugController;
 use App\Http\Controllers\FactoryController;
 use App\Http\Controllers\HookerController;
@@ -88,9 +89,14 @@ Route::prefix('/factory')->group(function () {
     Route::post('/collect', [FactoryController::class, 'collectProduction'])->name('factory.collect');
 });
 
-Route::prefix('/nightclube')->group(function () {
+Route::prefix('/nightclub')->group(function () {
     Route::get('/', [NightclubController::class, 'index'])->name('nightclub.index');
     Route::post('/fight/{user}', [NightclubController::class, 'fight'])->name('nightclub.fight');
+});
+
+Route::prefix('/boat')->group(function () {
+    Route::get('/', [BoatController::class, 'index'])->name('boat.index');
+    Route::post('/sell/{boat}', [BoatController::class, 'sell'])->name('boat.sell');
 });
 
 Route::get('dashboard', function () {

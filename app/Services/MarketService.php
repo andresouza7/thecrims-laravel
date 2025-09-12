@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 class MarketService
 {
     // public function __construct(protected User $user) {}
-    protected User $user;
+    public User $user;
 
     public function __construct()
     {
