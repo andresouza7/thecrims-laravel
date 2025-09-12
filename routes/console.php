@@ -9,3 +9,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('game:process-day')->everyMinute();
+Schedule::command('game:regenerate-stats')->everyMinute();

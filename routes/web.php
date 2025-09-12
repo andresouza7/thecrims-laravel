@@ -5,6 +5,7 @@ use App\Http\Controllers\BankController;
 use App\Http\Controllers\DrugController;
 use App\Http\Controllers\FactoryController;
 use App\Http\Controllers\HookerController;
+use App\Http\Controllers\NightclubController;
 use App\Models\Boat;
 use App\Models\Component;
 use App\Models\Drug;
@@ -82,6 +83,11 @@ Route::prefix('/factory')->group(function () {
     Route::post('/sell/{userFactory}', [FactoryController::class, 'sellFactory'])->name('factory.sell');
     Route::post('/upgrade/{userFactory}', [FactoryController::class, 'upgradeFactory'])->name('factory.upgrade');
     Route::post('/collect', [FactoryController::class, 'collectProduction'])->name('factory.collect');
+});
+
+Route::prefix('/nightclube')->group(function () {
+    Route::get('/', [NightclubController::class, 'index'])->name('nightclub.index');
+    Route::post('/fight/{user}', [NightclubController::class, 'fight'])->name('nightclub.fight');
 });
 
 Route::get('dashboard', function () {

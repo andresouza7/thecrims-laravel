@@ -42,7 +42,8 @@ class GameService
         return sprintf('%02d:%02d', (int)($totalGameMinutes / 60), (int)($totalGameMinutes % 60));
     }
 
-    public static function getGameDay(): int {
+    public static function getGameDay(): int
+    {
         return self::getGameData()->current_day;
     }
 
@@ -64,14 +65,18 @@ class GameService
         User::query()->update([
             'cash' => 100000,
             'bank' => 0,
+            'health' => 50,
+            'max_health' => 50,
+            'stamina' => 100,
+            'addiction' => 0,
             'hooker_profits' => 0,
             'drug_profits' => 0,
             'boat_profits' => 0,
             'factory_profits' => 0,
-            'strength' => 0,
-            'intelligence' => 0,
-            'charisma' => 0,
-            'tolerance' => 0,
+            'strength' => 5,
+            'intelligence' => 5,
+            'charisma' => 5,
+            'tolerance' => 5,
 
         ]);
     }
@@ -90,6 +95,29 @@ class GameService
         DB::table('user_components')->delete();
         DB::table('user_factories')->delete();
         DB::table('user_hookers')->delete();
+    }
+
+    public static function regenerateStats(): void
+    {
+        $healthRegenRate  = 10; // per tick
+        $staminaRegenRate = 20; // per tick
+        $staminaMax       = 100;
+
+        DB::transaction(function () use ($healthRegenRate, $staminaRegenRate, $staminaMax) {
+            // Regenerate health
+            DB::update("
+                UPDATE users
+                SET health = LEAST(health + ?, max_health)
+                WHERE health < max_health
+            ", [$healthRegenRate]);
+
+            // Regenerate stamina
+            DB::update("
+                UPDATE users
+                SET stamina = LEAST(stamina + ?, ?)
+                WHERE stamina < ?
+            ", [$staminaRegenRate, $staminaMax, $staminaMax]);
+        });
     }
 
     /** Orchestrator method */
