@@ -15,10 +15,6 @@ class Factory extends Model implements Buyable
         return $this->belongsTo(Drug::class);
     }
 
-    public function productions() {
-        return $this->hasMany(LabProduction::class);
-    }
-
     public function getPrice(): int
     {
         return (int) $this->price;

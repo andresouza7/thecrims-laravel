@@ -18,6 +18,10 @@ class Component extends Model implements Sellable, Stackable
         return (int) $this->price;
     }
 
+    public function drug() {
+        return $this->belongsTo(Drug::class);
+    }
+
     public function getName(): string
     {
         return $this->name;

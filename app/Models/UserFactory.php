@@ -21,6 +21,10 @@ class UserFactory extends Model implements Sellable
         return $this->belongsTo(Factory::class);
     }
 
+    public function productions() {
+        return $this->hasMany(LabProduction::class)->with('drug');
+    }
+
     public function getPrice(): int
     {
         return (int) $this->factory->price;

@@ -79,6 +79,9 @@ Route::prefix('/drug')->group(function () {
 Route::prefix('/factory')->group(function () {
     Route::get('/', [FactoryController::class, 'index'])->name('factory.index');
     Route::get('/lab/{userFactory}', [FactoryController::class, 'showFactory'])->name('factory.show');
+    Route::post('/lab/create/{userFactory}', [FactoryController::class, 'createLabProduction'])->name('factory.create');
+    Route::post('/lab/cancel/{production}', [FactoryController::class, 'cancelLabProduction'])->name('factory.cancel');
+    Route::post('/lab/claim/{production}', [FactoryController::class, 'claimLabProduction'])->name('factory.claim');
     Route::post('/buy/{factory}', [FactoryController::class, 'buyFactory'])->name('factory.buy');
     Route::post('/sell/{userFactory}', [FactoryController::class, 'sellFactory'])->name('factory.sell');
     Route::post('/upgrade/{userFactory}', [FactoryController::class, 'upgradeFactory'])->name('factory.upgrade');
