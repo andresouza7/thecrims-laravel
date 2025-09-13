@@ -14,6 +14,8 @@ import { useGameInfo } from '@/composables/useGameInfo'
 const page = usePage()
 const user = computed(() => page.props.user)
 
+console.log(user.value)
+
 const { gameDay, gameTime } = useGameInfo()
 </script>
 

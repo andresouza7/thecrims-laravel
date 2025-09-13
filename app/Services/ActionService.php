@@ -65,11 +65,77 @@ class ActionService
         });
     }
 
+    public function fight(User $victim)
+    {
+        $attacker = $this->user;
+
+        if ($attacker->health < 10) {
+            throw new \Exception("Too weak to perform this action.");
+        }
+
+        // Check stamina
+        $staminaCost = 20;
+        if ($attacker->stamina < $staminaCost) {
+            throw new \Exception("Not enough stamina to perform this action.");
+        }
+
+        // Reduce attacker stamina
+        $attacker->stamina -= $staminaCost;
+
+        // Compare assault powers
+        $attackerPower = $attacker->assault_power;
+        $victimPower   = $victim->assault_power;
+
+        // Randomize slightly to avoid deterministic outcome
+        $attackerRoll = $attackerPower + rand(0, 10);
+        $victimRoll   = $victimPower + rand(0, 10);
+
+        $winner = $attackerRoll >= $victimRoll ? $attacker : $victim;
+        $loser  = $winner->is($attacker) ? $victim : $attacker;
+
+        // Apply health loss
+        $winner->health = max(1, $winner->health - rand(5, 15)); // Winner loses some health
+        $loser->health  = 0; // Loser is killed
+
+        // If attacker wins, reward them
+        if ($winner->is($attacker)) {
+            $rewardCash = (int) ($victim->cash * 0.1); // Take victim's cash
+            $attacker->cash += $rewardCash;
+            $victim->cash  -= $rewardCash;
+
+            // Reward stats
+            $statReward = 2; // Example: 2 points each
+            $attacker->strength     += $statReward;
+            $attacker->intelligence += $statReward;
+            $attacker->charisma     += $statReward;
+            $attacker->tolerance    += $statReward;
+
+            // Register kill
+            DB::table('user_kills')->insert([
+                'killer_id' => $attacker->id,
+                'victim_id' => $victim->id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        // Persist changes
+        $attacker->save();
+        $victim->save();
+
+        return [
+            'winner' => $winner->id,
+            'loser' => $loser->id,
+            'rewardCash' => $winner->is($attacker) ? $rewardCash : 0,
+        ];
+    }
+
     public function rewardItem(Buyable $item, int $quantity): void
     {
         $item->addToUser($this->user, $quantity);
     }
 
+    // ==================== FACTORY ======================
     public function upgradeFactory(UserFactory $userFactory): void
     {
         DB::transaction(function () use ($userFactory) {
@@ -158,6 +224,7 @@ class ActionService
         });
     }
 
+    // ==================== HOOKER ======================
     public function collectHookerIncome()
     {
         $income = $this->user->hooker_income;
@@ -173,68 +240,39 @@ class ActionService
         });
     }
 
-    public function fight(User $victim)
+    // ==================== JAIL ======================
+    public function sendToJail(int $minutes = 30): void
     {
-        $attacker = $this->user;
+        $this->user->jail_end_time = Carbon::now()->addMinutes($minutes);
+        $this->user->save();
+    }
 
-        if ($attacker->health < 10) {
-            throw new \Exception("Too weak to perform this action.");
-        }
+    public function releaseFromJail(): void
+    {
+        $this->user->jail_end_time = null;
+        $this->user->save();
+    }
 
-        // Check stamina
-        $staminaCost = 20;
-        if ($attacker->stamina < $staminaCost) {
-            throw new \Exception("Not enough stamina to perform this action.");
-        }
+    public function bribeJailGuard() {}
 
-        // Reduce attacker stamina
-        $attacker->stamina -= $staminaCost;
+    // ==================== HOSPITAL ======================
+    public function detox($cost = 100)
+    {
+        DB::transaction(function () use ($cost) {
+            $this->user->validateFunds($cost);
+            $this->user->adjustStat('stamina', 100);
+        });
+    }
 
-        // Compare assault powers
-        $attackerPower = $attacker->assault_power;
-        $victimPower   = $victim->assault_power;
+    public function sendToHospital(int $minutes = 15)
+    {
+        $this->user->hospital_end_time = Carbon::now()->addMinutes($minutes);
+        $this->user->save();
+    }
 
-        // Randomize slightly to avoid deterministic outcome
-        $attackerRoll = $attackerPower + rand(0, 10);
-        $victimRoll   = $victimPower + rand(0, 10);
-
-        $winner = $attackerRoll >= $victimRoll ? $attacker : $victim;
-        $loser  = $winner->is($attacker) ? $victim : $attacker;
-
-        // Apply health loss
-        $winner->health = max(1, $winner->health - rand(5, 15)); // Winner loses some health
-        $loser->health  = 0; // Loser is killed
-
-        // If attacker wins, reward them
-        if ($winner->is($attacker)) {
-            $rewardCash = (int) ($victim->cash * 0.1); // Take victim's cash
-            $attacker->cash += $rewardCash;
-            $victim->cash  -= $rewardCash;
-
-            // Reward stats
-            $statReward = 2; // Example: 2 points each
-            $attacker->strength     += $statReward;
-            $attacker->intelligence += $statReward;
-            $attacker->charisma     += $statReward;
-            $attacker->tolerance    += $statReward;
-
-            // Register kill
-            DB::table('user_kills')->insert([
-                'killer_id' => $attacker->id,
-                'victim_id' => $victim->id,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        }
-
-        // Persist changes
-        $attacker->save();
-        $victim->save();
-
-        return [
-            'winner' => $winner->id,
-            'loser' => $loser->id,
-            'rewardCash' => $winner->is($attacker) ? $rewardCash : 0,
-        ];
+    public function releaseFromHospital()
+    {
+        $this->user->hospital_end_time = null;
+        $this->user->save();
     }
 }

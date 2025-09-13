@@ -51,6 +51,7 @@ return new class extends Migration
             $table->integer('dealer_transactions')->default(0);
             $table->integer('tickets')->default(0);
             $table->timestamp('jail_end_time')->nullable();
+            $table->timestamp('hospital_end_time')->nullable();
             $table->timestamp('hire_thieves_cooldown')->nullable();
 
             $table->json('equipment_ids')->nullable();

@@ -40,7 +40,7 @@ class GameService
 
     public static function getGameDay(): int
     {
-        return self::getGameData()->current_day;
+        return self::getGameData()?->current_day ?? 0;
     }
 
     public static function createRound()

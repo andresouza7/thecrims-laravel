@@ -50,6 +50,7 @@ class User extends Authenticatable
 
     protected $appends = [
         'in_jail',
+        'in_hospital',
         'robbery_skill',
         'assault_skill',
         'single_robbery_power',
@@ -138,27 +139,17 @@ class User extends Authenticatable
         return true;
     }
 
-    public function sendToJail(int $minutes = 30): void
-    {
-        $this->jail_end_time = Carbon::now()->addMinutes($minutes);
-        $this->save();
-    }
-
-    /**
-     * Release the user from jail immediately.
-     */
-    public function releaseFromJail(): void
-    {
-        $this->jail_end_time = null;
-        $this->save();
-    }
-
     /**
      * Check if the user is currently in jail.
      */
     public function getInJailAttribute(): bool
     {
         return $this->jail_end_time ? Carbon::now()->lt($this->jail_end_time) : false;
+    }
+
+    public function getInHospitalAttribute(): bool
+    {
+        return $this->hospital_end_time ? Carbon::now()->lt($this->hospital_end_time) : false;
     }
 
     // Robbery skill

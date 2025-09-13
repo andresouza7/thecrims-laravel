@@ -11,11 +11,13 @@ const props = defineProps(['foe'])
     <DefaultLayout>
         <h4>Nightclub</h4>
 
-        <p>{{ foe.name }}</p>
-        <p>power: {{ foe.assault_power }}</p>
+        <div v-if="foe">
+            <p>{{ foe.name }}</p>
+            <p>power: {{ foe.assault_power }}</p>
 
-        <Form :action="fight(foe.id)" method="post" class="w-full" :options="{ preserveScroll: true }">
-            <button type="submit" class="bg-red-500 text-white py-1 w-full rounded hover:bg-red-600">Fight</button>
-        </Form>
+            <Form :action="fight(foe.id)" method="post" class="w-full" :options="{ preserveScroll: true }">
+                <button type="submit" class="bg-red-500 text-white py-1 w-full rounded hover:bg-red-600">Fight</button>
+            </Form>
+        </div>
     </DefaultLayout>
 </template>
