@@ -14,7 +14,7 @@ class ProcessGameDay extends Command
 
     public function handle()
     {
-        GameService::advanceDay();
+        GameService::processDay();
 
         $this->info('Game day processed successfully!');
     }

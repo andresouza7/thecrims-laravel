@@ -3,33 +3,28 @@
 namespace App\Http\Controllers;
 
 use App\Models\Boat;
-use App\Models\Drug;
-use App\Services\DockService;
-use App\Services\MarketService;
+use App\Services\GameFacade;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class BoatController extends Controller
 {
-    public function index()
+    public function index(GameFacade $game)
     {
-        $data = DockService::getBoatData();
+        $data = $game->boat()->getBoatData();
 
         return Inertia::render('game/Docks', ['data' => $data]);
     }
 
-    public function sell(Boat $boat, Request $request, DockService $service, MarketService $market)
+    public function sell(Boat $boat, Request $request, GameFacade $game)
     {
         $request->validate([
             'amount' => 'required',
         ]);
 
-        try {
-            $boat->drug->validateInventory($service->user);
-            $service->sellToBoat($boat, $request->amount, $market);
-            redirect()->back()->with('message', 'drogas vendidas para o barco!');
-        } catch (\Throwable $th) {
-            redirect()->back()->with('error', $th->getMessage());
-        }
+        handleRequest(
+            fn() => $game->boat()->sellToBoat($boat, $request->amount),
+            'drogas vendidas para o barco'
+        );
     }
 }

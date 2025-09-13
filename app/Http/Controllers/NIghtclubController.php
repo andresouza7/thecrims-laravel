@@ -3,27 +3,26 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Services\GameFacade;
 use App\Services\UserService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class NightclubController extends Controller
 {
-    public function index()
+    public function index(GameFacade $game)
     {
-        $user = User::first();
-
-        $foe = User::whereNot('id', $user->id)
+        $foe = User::whereNot('id', $game->user->id)
             ->inRandomOrder()
             ->first();
 
         return Inertia::render('game/Nightclub', ['foe' => $foe]);
     }
 
-    public function fight(User $user, UserService $service)
+    public function fight(User $user, GameFacade $game)
     {
         try {
-            $result = $service->fight($user);
+            $result = $game->action()->fight($user);
 
             if ($result['loser'] === $user->id) {
                 return redirect()->back()->with('success', 'Você venceu!');

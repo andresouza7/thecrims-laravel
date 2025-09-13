@@ -3,10 +3,6 @@
 namespace App\Services;
 
 use App\Models\GameState;
-use App\Models\Player;
-use App\Models\UserHooker;
-use App\Models\UserFactory;
-use App\Models\Factory;
 use App\Models\Boat;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -51,7 +47,7 @@ class GameService
     {
         self::resetData();
 
-        DockService::scheduleBoats();
+        BoatService::scheduleBoats();
 
         GameState::updateOrCreate(
             ['id' => 1],
@@ -121,30 +117,33 @@ class GameService
     }
 
     /** Orchestrator method */
-    public static function advanceDay()
+    public static function processDay()
     {
-        $game = GameState::first();
+        $game = self::getGameData();
 
         if (!$game || $game->current_day >= $game->total_days) {
             return;
         }
 
-        DB::transaction(function () use ($game) {
-            $game->increment('current_day');
-            self::applyBankInterest();
-            self::processHookerIncome();
-            self::processFactoryProduction();
-            self::deductFactoryMaintenance();
-            self::markBoatsGone($game->current_day);
-            self::resetDealerTransactions();
-            self::grantDailyTickets();
-        });
+        try {
+            DB::transaction(function () use ($game) {
+                self::applyBankInterest();
+                self::processHookerIncome();
+                self::processFactoryProduction();
+                self::deductFactoryMaintenance();
+                self::markBoatGoneForDay($game->current_day);
+                self::resetDealerTransactions();
+                self::grantDailyTickets();
+                self::advanceDay();
+            });
+        } catch (\Throwable $th) {
+            throw $th;
+        }
     }
 
-    protected static function applyBankInterest()
+    protected static function applyBankInterest(float $multiplier = 1.02): void
     {
-        User::where('bank', '>', 0)
-            ->update(['bank' => DB::raw('bank * 1.02')]);
+        DB::update("UPDATE users SET bank = bank * ? WHERE bank > 0", [$multiplier]);
     }
 
     protected static function processHookerIncome()
@@ -186,18 +185,24 @@ class GameService
         ");
     }
 
-    protected static function markBoatsGone(int $currentDay)
+    protected static function markBoatGoneForDay(int $currentDay)
     {
-        Boat::where('day', $currentDay - 1)->update(['is_gone' => true]);
+        Boat::where('day', $currentDay)->update(['is_gone' => true]);
     }
 
-    protected static function resetDealerTransactions()
+    protected static function resetDealerTransactions(): void
     {
         User::query()->update(['dealer_transactions' => 0]);
     }
 
-    protected static function grantDailyTickets()
+    protected static function grantDailyTickets(int $amount = 75, int $cap = 300): void
     {
-        User::query()->update(['tickets' => DB::raw('LEAST(tickets + 75, 300)')]);
+        DB::update("UPDATE users SET tickets = LEAST(tickets + ?, ?)", [$amount, $cap]);
+    }
+
+    protected static function advanceDay()
+    {
+        $game = self::getGameData();
+        $game->increment('current_day');
     }
 }

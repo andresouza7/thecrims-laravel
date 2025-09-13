@@ -2,32 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
-use App\Services\UserService;
+use App\Services\GameFacade;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class BankController extends Controller
 {
-    public function index() {
+    public function index()
+    {
         return Inertia::render('game/Bank');
     }
 
-    public function deposit(Request $request) {
-        $user = User::first();
-        $service = new UserService($user);
-
-        $service->deposit($request->amount);
-
-        return redirect()->back();
+    public function deposit(Request $request, GameFacade $game)
+    {
+        handleRequest(fn() => $game->action()->deposit($request->amount), 'depósito efetuado!');
     }
 
-    public function withdraw(Request $request) {
-        $user = User::first();
-        $service = new UserService($user);
-
-        $service->withdraw($request->amount);
-
-        return redirect()->back();
+    public function withdraw(Request $request, GameFacade $game)
+    {
+        handleRequest(fn() =>  $game->action()->withdraw($request->amount), 'saque realizado!');
     }
 }

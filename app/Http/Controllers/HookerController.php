@@ -4,56 +4,36 @@ namespace App\Http\Controllers;
 
 use App\Models\Hooker;
 use App\Models\User;
-use App\Services\MarketService;
-use App\Services\UserService;
+use App\Services\GameFacade;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class HookerController
 {
-    public function index()
+    public function index(GameFacade $game)
     {
         $hookers = Hooker::orderBy('name')->get();
+        $owned = $game->user->hookers;
 
-        $user = User::first();
-        $owned = $user->hookers;
-        return Inertia::render('game/Hooker', ['hookers' => $hookers, 'owned' => $owned]);
+        return Inertia::render('game/Hooker', compact('hookers', 'owned'));
     }
 
-    public function buyHooker(Hooker $hooker, Request $request, MarketService $service)
+    public function buyHooker(Hooker $hooker, Request $request, GameFacade $game)
     {
-        $request->validate([
-            'amount' => 'required'
-        ]);
+        $request->validate(['amount' => 'required']);
 
-        try {
-            $service->buy($hooker, $request->amount);
-            return redirect()->back()->with('message', 'putas compradas!');
-        } catch (\Throwable $th) {
-            return redirect()->back()->with('error', $th->getMessage());
-        }
+        handleRequest(fn() => $game->action()->buy($hooker, $request->amount), 'putas compradas!');
     }
 
-    public function sellHooker(Hooker $hooker, Request $request, MarketService $service)
+    public function sellHooker(Hooker $hooker, Request $request, GameFacade $game)
     {
-        $request->validate([
-            'amount' => 'required'
-        ]);
+        $request->validate(['amount' => 'required']);
 
-        try {
-            $service->sell($hooker, $request->amount);
-            return redirect()->back()->with('message', 'putas vendidas!');
-        } catch (\Throwable $th) {
-            return redirect()->back()->with('error', $th->getMessage());
-        }
+        handleRequest(fn() => $game->action()->sell($hooker, $request->amount), 'putas vendidas!');
     }
 
-    public function collectIncome(UserService $service) {
-        try {
-            $service->collectHookerIncome();
-            return redirect()->back()->with('message', 'dinheiro coletado!');
-        } catch (\Throwable $th) {
-            return redirect()->back()->with('error', $th->getMessage());
-        }
+    public function collectIncome(GameFacade $game)
+    {
+        handleRequest(fn() => $game->action()->collectHookerIncome(), 'dinheiro coletado!');
     }
 }

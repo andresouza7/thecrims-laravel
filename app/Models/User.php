@@ -99,27 +99,20 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
-    public function sendToJail(int $minutes = 30): void
+    public function validateFunds(int $cost): void
     {
-        $this->jail_end_time = Carbon::now()->addMinutes($minutes);
-        $this->save();
+        if ($this->cash < $cost) {
+            throw new \RuntimeException("Not enough cash.");
+        }
     }
 
-    /**
-     * Release the user from jail immediately.
-     */
-    public function releaseFromJail(): void
+    public function adjustCash(int $amount): void
     {
-        $this->jail_end_time = null;
-        $this->save();
-    }
+        $accountBlocked = false;
 
-    /**
-     * Check if the user is currently in jail.
-     */
-    public function getInJailAttribute(): bool
-    {
-        return $this->jail_end_time ? Carbon::now()->lt($this->jail_end_time) : false;
+        if ($accountBlocked) throw new \RuntimeException('your account is blocked, sort this out to make transactions');
+
+        $this->increment('cash', $amount);
     }
 
     public function adjustStat(string $type, int $amount): bool
@@ -143,6 +136,29 @@ class User extends Authenticatable
         $this->increment($type, $amount);
 
         return true;
+    }
+
+    public function sendToJail(int $minutes = 30): void
+    {
+        $this->jail_end_time = Carbon::now()->addMinutes($minutes);
+        $this->save();
+    }
+
+    /**
+     * Release the user from jail immediately.
+     */
+    public function releaseFromJail(): void
+    {
+        $this->jail_end_time = null;
+        $this->save();
+    }
+
+    /**
+     * Check if the user is currently in jail.
+     */
+    public function getInJailAttribute(): bool
+    {
+        return $this->jail_end_time ? Carbon::now()->lt($this->jail_end_time) : false;
     }
 
     // Robbery skill

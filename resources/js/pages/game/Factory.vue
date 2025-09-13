@@ -73,6 +73,7 @@ console.log(props.owned)
                             <div>
                                 <h3 class="font-medium">{{ factory.name }}</h3>
                                 <p class="text-gray-300">Price: ${{ factory.price }}</p>
+                                <p class="text-gray-300">Sells: ${{ factory.drug.name }}</p>
                             </div>
                         </div>
 

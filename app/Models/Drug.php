@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Interfaces\Buyable;
 use App\Interfaces\Sellable;
 use App\Interfaces\Stackable;
 use App\Interfaces\StackableItem;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\DB;
 
-class Drug extends Model implements Sellable, Stackable
+class Drug extends Model implements Buyable, Sellable, Stackable
 {
     use HasFactory;
 
@@ -34,7 +35,7 @@ class Drug extends Model implements Sellable, Stackable
     public function getAmountForUser(User $user): int
     {
         $row = $this->users()->where('user_id', $user->id)->first();
-        return $row ? $row->pivot->amount : 0; 
+        return $row ? $row->pivot->amount : 0;
     }
 
     public function addToUser(User $user, int $quantity = 1): void
@@ -62,4 +63,3 @@ class Drug extends Model implements Sellable, Stackable
         }
     }
 }
-

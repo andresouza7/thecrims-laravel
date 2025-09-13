@@ -7,41 +7,9 @@ use App\Http\Controllers\DrugController;
 use App\Http\Controllers\FactoryController;
 use App\Http\Controllers\HookerController;
 use App\Http\Controllers\NightclubController;
-use App\Models\Boat;
-use App\Models\Component;
-use App\Models\Drug;
-use App\Models\Factory;
-use App\Models\Hooker;
-use App\Models\User;
-use App\Services\DockService;
 use App\Services\GameService;
-use App\Services\UserService;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-
-use function Pest\Laravel\json;
-
-Route::get('/do', function () {
-    // return Inertia::render('Welcome');
-    $hooker = Hooker::first();
-    $user = User::first();
-    $drug = Drug::first();
-    // dd($drug->getAmountForUser($user));
-    $component = Component::first();
-    $factory = Factory::first();
-    $service = new UserService($user);
-    $boat = Boat::first();
-    try {
-        //code...
-        // DockService::sellDrugOnBoat($drug, $boat, 10);
-        // $service->buy($drug, 20);
-        dd(DockService::getNextBoatBoostInfo($user->boat_profits));
-    } catch (\Throwable $th) {
-        echo $th->getMessage();
-        //throw $th;
-    }
-    return "home";
-})->name('do');
 
 Route::get('/', function () {
     return Inertia::render('game/Home');
@@ -74,7 +42,8 @@ Route::prefix('/hooker')->group(function () {
 
 Route::prefix('/drug')->group(function () {
     Route::get('/', [DrugController::class, 'index'])->name('drug.index');
-    Route::post('/sell/{drug}', [DrugController::class, 'sellDrug'])->name('drug.sell');
+    Route::post('/sell/{drug}', [DrugController::class, 'sell'])->name('drug.sell');
+    Route::post('/reward', [DrugController::class, 'reward'])->name('drug.reward');
 });
 
 Route::prefix('/factory')->group(function () {

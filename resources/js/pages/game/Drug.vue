@@ -1,6 +1,6 @@
 <script setup>
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
-import { sell } from '@/routes/drug';
+import { sell, reward } from '@/routes/drug';
 import { Form } from '@inertiajs/vue3';
 
 const props = defineProps(['drugs']);
@@ -10,6 +10,12 @@ const props = defineProps(['drugs']);
   <DefaultLayout>
     <section class="max-w-4xl mx-auto mt-8">
       <h1 class="text-2xl font-bold mb-6">Drug Shop</h1>
+
+      <Form :action="reward()" method="post" class="flex items-center space-x-2">
+        <button type="submit" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">
+          Get drug
+        </button>
+      </Form>
 
       <div class="space-y-4">
         <div v-for="drug in drugs" :key="drug.id"

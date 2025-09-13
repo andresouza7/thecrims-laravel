@@ -4,20 +4,12 @@ namespace App\Services;
 
 use App\Models\Boat;
 use App\Models\Drug;
-use App\Models\GameState;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
 
-class DockService
+class BoatService
 {
-    public User $user;
-
-    public function __construct()
-    {
-        $user = User::first();
-        $this->user = $user;
-    }
+    public function __construct(protected User $user, protected ActionService $action) {}
 
     protected static array $boosts = [
         ['label' => 'Iniciante', 'min' => 0, 'max' => 9999, 'multiplier' => 1.1],
@@ -75,9 +67,9 @@ class DockService
         }
     }
 
-    public static function getBoatData(): array
+    public function getBoatData(): array
     {
-        $user = User::first();
+        $user = $this->user;
 
         $currentDay = GameService::getGameDay();
 
@@ -122,27 +114,20 @@ class DockService
         ];
     }
 
-    public function sellToBoat(Boat $boat, int $amount, MarketService $service): void
+    public function sellToBoat(Boat $boat, int $amount): void
     {
-        $user = $this->user;
-
-        DB::transaction(function () use ($user, $boat, $amount, $service) {
-            // Validate that boat day matches current day
-            // $currentDay = DB::table('game_state')->value('current_day');
+        DB::transaction(function () use ($boat, $amount) {
+            $boat->drug->validateInventory($this->user, $amount);
             $currentDay = GameService::getGameDay();
             
             if ($boat->day !== $currentDay) {
-                throw ValidationException::withMessages([
-                    'boat' => "Boat day {$boat->day} does not match current game day {$currentDay}.",
-                ]);
+                throw new \RuntimeException("Boat day {$boat->day} does not match current game day {$currentDay}.");
             }
 
-            // Calculate profits
-            $profits = $boat->drug->price * $amount;
-            $service->sell($boat->drug, $amount);
+            $profit = $boat->drug->price * $amount;
+            $this->action->sell($boat->drug, $amount);
 
-            // Update player stats
-            $user->increment('boat_profits', $profits);
+            $this->user->increment('boat_profits', $profit);
         });
     }
 }

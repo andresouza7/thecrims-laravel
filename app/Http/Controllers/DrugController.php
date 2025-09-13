@@ -3,33 +3,30 @@
 namespace App\Http\Controllers;
 
 use App\Models\Drug;
-use App\Models\User;
-use App\Services\MarketService;
-use App\Services\UserService;
+use App\Services\GameFacade;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class DrugController extends Controller
 {
-    public function index()
+    public function index(GameFacade $game)
     {
-        $user = User::first();
-        $drugs = $user->drugs;
-
-        return Inertia::render('game/Drug', ['drugs' => $drugs]);
+        return Inertia::render('game/Drug', ['drugs' => $game->user->drugs]);
     }
 
-    public function sellDrug(Drug $drug, Request $request, MarketService $service)
+    public function reward(GameFacade $game)
+    {
+        $drug = Drug::inRandomOrder()->first();
+
+        handleRequest(fn() => $game->action()->rewardItem($drug, 200), 'drugs added to user!');
+    }
+
+    public function sell(Drug $drug, Request $request, GameFacade $game)
     {
         $request->validate([
             'amount' => 'required'
         ]);
 
-        try {
-            $service->sell($drug, $request->amount);
-            return redirect()->back()->with('message', 'drogas vendidas!');
-        } catch (\Throwable $th) {
-            return redirect()->back()->with('error', $th->getMessage());
-        }
+        handleRequest(fn() => $game->action()->sell($drug, $request->amount), 'drogas vendidas!');
     }
 }
