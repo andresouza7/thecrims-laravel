@@ -66,7 +66,7 @@ const pay = () => {
               type="submit"
               class="bg-red-600 text-white py-2 px-4 w-full rounded-lg hover:bg-red-700 transition"
             >
-              Pagar suborno
+              Pagar suborno (${{ user.jail_release_cost }})
             </button>
           </Form>
         </div>

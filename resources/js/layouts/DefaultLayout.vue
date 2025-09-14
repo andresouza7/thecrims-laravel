@@ -76,9 +76,10 @@ const { gameDay, gameTime } = useGameInfo()
                 <div class="w-full">
                     <h4 class="font-medium">User data</h4>
                     <div v-if="user" class="text-sm">
-                        <div>{{ user.name }}</div>
-                        <div>{{ user.cash }}</div>
-                        <div>{{ user.bank }}</div>
+                        <div>name: {{ user.name }}</div>
+                        <div>cash: {{ user.cash }}</div>
+                        <div>bank: {{ user.bank }}</div>
+                        <div>respect: {{ user.respect }}</div>
                         <div>{{ user.jail_end_time }} {{ user.in_jail }}</div>
                     </div>
                 </div>

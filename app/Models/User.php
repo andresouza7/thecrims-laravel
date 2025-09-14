@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Enums\VitalType;
 
 class User extends Authenticatable
 {
@@ -51,6 +52,8 @@ class User extends Authenticatable
     protected $appends = [
         'in_jail',
         'in_hospital',
+        'jail_release_cost',
+        'hospital_release_cost',
         'robbery_skill',
         'assault_skill',
         'single_robbery_power',
@@ -116,27 +119,35 @@ class User extends Authenticatable
         $this->increment('cash', $amount);
     }
 
-    public function adjustStat(string $type, int $amount): bool
+    public function setVitals(VitalType $type, int $amount): void
     {
-        $currentValue = (int) $this->getAttribute($type);
+        $this->{$type->value} = $amount; 
+        $this->save();
+    }
+
+    public function adjustVitals(VitalType $type, int $amount): void
+    {
+        $currentValue = (int) $this->getAttribute($type->value);
         $newValue = $currentValue + $amount;
 
-        // Determine maximum value
-        $max = $newValue;
-        if ($type === 'health') {
-            $max = (int) $this->getAttribute('max_health');
-        } elseif (in_array($type, ['stamina', 'addiction'])) {
-            $max = 100;
-        }
+        $max = match ($type) {
+            VitalType::HEALTH => (int) $this->getAttribute('max_health'),
+            VitalType::STAMINA, VitalType::ADDICTION => 100,
+        };
 
-        // Apply bounds
         if ($newValue < 0 || $newValue > $max) {
-            return false;
+            throw new \RuntimeException('invalid amount!');
         }
 
-        $this->increment($type, $amount);
+        $this->increment($type->value, $amount);
+    }
 
-        return true;
+    public function adjustStats(int $amount)
+    {
+        $this->increment('strength', $amount);
+        $this->increment('intelligence', $amount);
+        $this->increment('charisma', $amount);
+        $this->increment('tolerance', $amount);
     }
 
     /**
@@ -150,6 +161,16 @@ class User extends Authenticatable
     public function getInHospitalAttribute(): bool
     {
         return $this->hospital_end_time ? Carbon::now()->lt($this->hospital_end_time) : false;
+    }
+
+    public function getJailReleaseCostAttribute(): int
+    {
+        return $this->assault_power * 1000;
+    }
+
+    public function getHospitalReleaseCostAttribute(): int
+    {
+        return $this->respect * 1000;
     }
 
     // Robbery skill

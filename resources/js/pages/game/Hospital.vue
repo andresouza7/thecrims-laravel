@@ -64,7 +64,7 @@ onUnmounted(() => {
               type="submit"
               class="bg-blue-600 text-white py-2 px-4 w-full rounded-lg hover:bg-blue-700 transition"
             >
-              Pagar plano de saúde
+              Pagar plano de saúde (${{ user.hospital_release_cost }})
             </button>
         </Form>
         </div>

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\VitalType;
 use App\Interfaces\Buyable;
 use App\Interfaces\Sellable;
 use App\Models\Component;
@@ -69,66 +70,62 @@ class ActionService
     {
         $attacker = $this->user;
 
-        if ($attacker->health < 10) {
-            throw new \Exception("Too weak to perform this action.");
-        }
+        $winner = null;
+        $loser = null;
+        $rewardCash = 0;
 
-        // Check stamina
-        $staminaCost = 20;
-        if ($attacker->stamina < $staminaCost) {
-            throw new \Exception("Not enough stamina to perform this action.");
-        }
+        DB::transaction(function () use ($attacker, $victim, &$winner, &$loser, &$rewardCash) {
+            if ($attacker->health < 10) {
+                throw new \Exception("Too weak to perform this action.");
+            }
 
-        // Reduce attacker stamina
-        $attacker->stamina -= $staminaCost;
+            // Check stamina
+            $staminaCost = 20;
+            if ($attacker->stamina < $staminaCost) {
+                throw new \Exception("Not enough stamina to perform this action.");
+            }
 
-        // Compare assault powers
-        $attackerPower = $attacker->assault_power;
-        $victimPower   = $victim->assault_power;
+            // Reduce attacker stamina
+            $attacker->adjustVitals(VitalType::STAMINA, -$staminaCost);
 
-        // Randomize slightly to avoid deterministic outcome
-        $attackerRoll = $attackerPower + rand(0, 10);
-        $victimRoll   = $victimPower + rand(0, 10);
+            // Randomize slightly to avoid deterministic outcome
+            $attackerRoll = $attacker->assault_power + rand(0, 10);
+            $victimRoll   = $victim->assault_power + rand(0, 10);
 
-        $winner = $attackerRoll >= $victimRoll ? $attacker : $victim;
-        $loser  = $winner->is($attacker) ? $victim : $attacker;
+            $winner = $attackerRoll >= $victimRoll ? $attacker : $victim;
+            $loser  = $winner->is($attacker) ? $victim : $attacker;
 
-        // Apply health loss
-        $winner->health = max(1, $winner->health - rand(5, 15)); // Winner loses some health
-        $loser->health  = 0; // Loser is killed
+            // Apply health loss
+            $winner->setVitals(VitalType::HEALTH, max(1, $winner->health - rand(5, 15)));
+            $loser->setVitals(VitalType::HEALTH, 0);
 
-        // If attacker wins, reward them
-        if ($winner->is($attacker)) {
-            $rewardCash = (int) ($victim->cash * 0.1); // Take victim's cash
-            $attacker->cash += $rewardCash;
-            $victim->cash  -= $rewardCash;
+            $rewardCash = 0;
+            // If attacker wins, reward them
+            if ($winner->is($attacker)) {
+                $rewardCash = (int) ($victim->cash * 0.1); // Take victim's cash
+                $attacker->adjustCash($rewardCash);
+                $victim->adjustCash(-$rewardCash);
 
-            // Reward stats
-            $statReward = 2; // Example: 2 points each
-            $attacker->strength     += $statReward;
-            $attacker->intelligence += $statReward;
-            $attacker->charisma     += $statReward;
-            $attacker->tolerance    += $statReward;
+                // Reward stats
+                $statReward = 2; // Example: 2 points each
+                $attacker->adjustStats($statReward);
 
-            // Register kill
-            DB::table('user_kills')->insert([
-                'killer_id' => $attacker->id,
-                'victim_id' => $victim->id,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        } else {
-            $this->sendToHospital();
-        }
-
-        // Persist changes
-        $attacker->save();
-        $victim->save();
+                // Register kill
+                DB::table('user_kills')->insert([
+                    'killer_id' => $attacker->id,
+                    'victim_id' => $victim->id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            } else {
+                $this->sendToHospital();
+            }
+        });
 
         return [
-            'winner' => $winner->id,
-            'loser' => $loser->id,
-            'rewardCash' => $winner->is($attacker) ? $rewardCash : 0,
+            'winner' => $winner ? $winner->id : null,
+            'loser' => $loser ? $loser->id : null,
+            'rewardCash' => $rewardCash,
         ];
     }
 
@@ -251,8 +248,14 @@ class ActionService
 
     public function releaseFromJail(): void
     {
-        $this->user->jail_end_time = null;
-        $this->user->save();
+        DB::transaction(function () {
+            $cost = $this->user->jail_release_cost;
+
+            $this->user->validateFunds($this->user->jail_release_cost);
+            $this->user->adjustCash(-$cost);
+            $this->user->jail_end_time = null;
+            $this->user->save();
+        });
     }
 
     public function bribeJailGuard() {}
@@ -260,10 +263,8 @@ class ActionService
     // ==================== HOSPITAL ======================
     public function detox($cost = 100)
     {
-        DB::transaction(function () use ($cost) {
-            $this->user->validateFunds($cost);
-            $this->user->adjustStat('stamina', 100);
-        });
+        $this->user->validateFunds($cost);
+        $this->user->setVitals(VitalType::STAMINA, 100);
     }
 
     public function sendToHospital(int $minutes = 15)
@@ -274,7 +275,13 @@ class ActionService
 
     public function releaseFromHospital()
     {
-        $this->user->hospital_end_time = null;
-        $this->user->save();
+        DB::transaction(function () {
+            $cost = $this->user->hospital_release_cost;
+
+            $this->user->validateFunds($cost);
+            $this->user->adjustCash(-$cost);
+            $this->user->hospital_end_time = null;
+            $this->user->save();
+        });
     }
 }
