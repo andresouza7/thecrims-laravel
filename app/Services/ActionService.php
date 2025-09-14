@@ -117,6 +117,8 @@ class ActionService
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
+        } else {
+            $this->sendToHospital();
         }
 
         // Persist changes

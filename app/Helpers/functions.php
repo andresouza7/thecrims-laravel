@@ -15,14 +15,15 @@ if (! function_exists('handleRequest')) {
         try {
             $callback();
 
-            return redirect()->back()->with('message', $successMessage ?? 'Operação realizada com sucesso!');
+            return back()->with('message', $successMessage ?? 'Operação realizada com sucesso!');
+            // return redirect()->back()->with('message', $successMessage ?? 'Operação realizada com sucesso!');
         } catch (\Throwable $th) {
             Log::error('Request handling failed', [
                 'error' => $th->getMessage(),
                 'trace' => $th->getTraceAsString(),
             ]);
 
-            return redirect()->back()->with('error', $th->getMessage());
+            return back()->with('error', $th->getMessage());
         }
     }
 }

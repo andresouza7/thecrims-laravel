@@ -9,6 +9,8 @@ import { index as drug } from '@/routes/drug'
 import { index as factory } from '@/routes/factory'
 import { index as nightclub } from '@/routes/nightclub'
 import { index as boat } from '@/routes/boat'
+import { index as jail } from '@/routes/jail'
+import { index as hospital} from '@/routes/hospital'
 import { useGameInfo } from '@/composables/useGameInfo'
 
 const page = usePage()
@@ -77,6 +79,7 @@ const { gameDay, gameTime } = useGameInfo()
                         <div>{{ user.name }}</div>
                         <div>{{ user.cash }}</div>
                         <div>{{ user.bank }}</div>
+                        <div>{{ user.jail_end_time }} {{ user.in_jail }}</div>
                     </div>
                 </div>
 
@@ -117,6 +120,8 @@ const { gameDay, gameTime } = useGameInfo()
             <Link :href="drug()">Drugs</Link>
             <Link :href="factory()">Factories</Link>
             <Link :href="boat()">Docks</Link>
+            <Link :href="jail()">Jail</Link>
+            <Link :href="hospital()">Hospital</Link>
             <Link href="/admin">Admin</Link>
         </div>
 

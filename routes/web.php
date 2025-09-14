@@ -6,6 +6,7 @@ use App\Http\Controllers\BoatController;
 use App\Http\Controllers\DrugController;
 use App\Http\Controllers\FactoryController;
 use App\Http\Controllers\HookerController;
+use App\Http\Controllers\HospitalController;
 use App\Http\Controllers\JailController;
 use App\Http\Controllers\NightclubController;
 use App\Services\GameService;
@@ -71,10 +72,12 @@ Route::prefix('/boat')->group(function () {
 
 Route::prefix('/jail')->group(function () {
     Route::get('/', [JailController::class, 'index'])->name('jail.index');
+    Route::post('/release', [JailController::class, 'release'])->name('jail.release');
 });
 
 Route::prefix('/hospital')->group(function () {
-    Route::get('/', [BoatController::class, 'index'])->name('hospital.index');
+    Route::get('/', [HospitalController::class, 'index'])->name('hospital.index');
+    Route::post('/release', [HospitalController::class, 'release'])->name('hospital.release');
 });
 
 Route::get('dashboard', function () {

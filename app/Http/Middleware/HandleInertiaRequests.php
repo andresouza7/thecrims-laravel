@@ -43,7 +43,7 @@ class HandleInertiaRequests extends Middleware
 
         return [
             ...parent::share($request),
-            'user' => $user,
+            'user' => $user?->fresh(),
             'name' => config('app.name'),
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => [

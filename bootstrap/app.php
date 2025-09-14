@@ -22,6 +22,10 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
         ]);
+
+        $middleware->use([
+            CheckUserStatus::class
+        ]);
        
     })
     ->withExceptions(function (Exceptions $exceptions) {
