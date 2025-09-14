@@ -74,6 +74,7 @@ class GameService
         DB::table('user_components')->delete();
         DB::table('user_factories')->delete();
         DB::table('user_hookers')->delete();
+        DB::table('user_equipment')->delete();
     }
 
     public static function resetUserData()
@@ -95,6 +96,8 @@ class GameService
             'tolerance' => 5,
             'jail_end_time' => null,
             'hospital_end_time' => null,
+            'armor_id' => null,
+            'weapon_id' => null,
         ]);
     }
 

@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Enums\VitalType;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class User extends Authenticatable
 {
@@ -103,6 +104,23 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
+    public function equipment()
+    {
+        return $this->belongsToMany(Equipment::class, 'user_equipment')
+            ->withPivot(['id', 'active'])
+            ->withTimestamps();
+    }
+
+    public function armor()
+    {
+        return $this->belongsTo(Equipment::class, 'armor_id');
+    }
+
+    public function weapon()
+    {
+        return $this->belongsTo(Equipment::class, 'weapon_id');
+    }
+
     public function validateFunds(int $cost): void
     {
         if ($this->cash < $cost) {
@@ -121,7 +139,7 @@ class User extends Authenticatable
 
     public function setVitals(VitalType $type, int $amount): void
     {
-        $this->{$type->value} = $amount; 
+        $this->{$type->value} = $amount;
         $this->save();
     }
 
@@ -150,9 +168,16 @@ class User extends Authenticatable
         $this->increment('tolerance', $amount);
     }
 
-    /**
-     * Check if the user is currently in jail.
-     */
+    protected function getActiveArmor(): int
+    {
+        return $this->armor ? $this->armor->base_damage : 0;
+    }
+
+    protected function getActiveWeapon(): int
+    {
+        return $this->weapon ? $this->weapon->base_damage : 0;
+    }
+   
     public function getInJailAttribute(): bool
     {
         return $this->jail_end_time ? Carbon::now()->lt($this->jail_end_time) : false;
@@ -194,7 +219,7 @@ class User extends Authenticatable
                     $this->tolerance * 0.25 +
                     $this->charisma * 0.1 +
                     $this->strength * 0.15) * 0.6 * $this->robbery_skill
-            ) + $this->armor + $this->weapon
+            ) + $this->getActiveArmor() + $this->getActiveWeapon()
         );
     }
 
@@ -207,7 +232,7 @@ class User extends Authenticatable
                     $this->tolerance * 0.5 +
                     $this->charisma * 0.1 +
                     $this->strength * 0.15) * 0.6 * $this->robbery_skill
-            ) + $this->armor + $this->weapon
+            ) + $this->getActiveArmor() + $this->getActiveWeapon()
         );
     }
 
@@ -221,7 +246,7 @@ class User extends Authenticatable
                     $this->tolerance * 0.25 +
                     $this->strength * 0.7) / 2
             ) * $this->assault_skill * $vip_bonus
-                + $this->armor + $this->weapon
+                + $this->getActiveArmor() + $this->getActiveWeapon()
         );
     }
 

@@ -8,6 +8,7 @@ use App\Interfaces\Sellable;
 use App\Models\Component;
 use App\Models\LabProduction;
 use App\Models\User;
+use App\Models\UserEquipment;
 use App\Models\UserFactory;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -64,6 +65,17 @@ class ActionService
 
             $this->user->increment('drug_profits', $profit);
         });
+    }
+
+    public function activateEquipment(UserEquipment $userEquipment): void
+    {
+        if ($userEquipment->equipment->type === 'armor') {
+            $this->user->armor_id = $userEquipment->equipment_id;
+        } else {
+            $this->user->weapon_id = $userEquipment->equipment_id;
+        }
+
+        $this->user->save();
     }
 
     public function fight(User $victim)

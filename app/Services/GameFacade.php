@@ -14,7 +14,7 @@ class GameFacade
 
     public function __construct()
     {
-        $this->user = Auth::user() ?? User::first();
+        $this->user = Auth::user() ?? User::with(['armor', 'weapon'])->first();
         $this->actionService = new ActionService($this->user);
         $this->boatService = new BoatService($this->user, $this->actionService);
     }

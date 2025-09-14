@@ -34,11 +34,7 @@ return new class extends Migration
             $table->unsignedBigInteger('strength')->default(0);
             $table->unsignedBigInteger('charisma')->default(0);
             $table->unsignedBigInteger('tolerance')->default(0);
-            $table->unsignedBigInteger('respect')->default(0);
 
-            $table->unsignedBigInteger('single_robbery_power')->default(0);
-            $table->unsignedBigInteger('gang_robbery_power')->default(0);
-            $table->unsignedBigInteger('assault_power')->default(0);
             $table->unsignedBigInteger('single_robbery_count')->default(0);
             $table->unsignedBigInteger('gang_robbery_count')->default(0);
 
@@ -54,7 +50,6 @@ return new class extends Migration
             $table->timestamp('hospital_end_time')->nullable();
             $table->timestamp('hire_thieves_cooldown')->nullable();
 
-            $table->json('equipment_ids')->nullable();
             $table->foreignId('armor_id')->nullable()->constrained('equipment')->nullOnDelete();
             $table->foreignId('weapon_id')->nullable()->constrained('equipment')->nullOnDelete();
             $table->timestamps();

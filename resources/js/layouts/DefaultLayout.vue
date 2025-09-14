@@ -11,6 +11,8 @@ import { index as nightclub } from '@/routes/nightclub'
 import { index as boat } from '@/routes/boat'
 import { index as jail } from '@/routes/jail'
 import { index as hospital} from '@/routes/hospital'
+import { index as market } from '@/routes/market'
+import { index as inventory} from '@/routes/inventory'
 import { useGameInfo } from '@/composables/useGameInfo'
 
 const page = usePage()
@@ -32,7 +34,7 @@ const { gameDay, gameTime } = useGameInfo()
         <div class="p-2 rounded-sm border-1">
             <h4 class="font-medium mb-2">User data</h4>
 
-            <div v-if="user" class="grid grid-cols-4 gap-4 text-sm">
+            <div v-if="user" class="grid grid-cols-5 gap-4 text-sm">
                 <!-- Coluna 1: Avatar + barras -->
                 <div class="flex flex-col items-center gap-2">
                     <!-- <img :src="`https://picsum.photos/seed/${user.id}/100`" alt="User Avatar"
@@ -100,6 +102,11 @@ const { gameDay, gameTime } = useGameInfo()
                     <div>Gang Robbery: {{ user.gang_robbery_power }}</div>
                     <div>Assault: {{ user.assault_power }}</div>
                 </div>
+
+                <div>
+                    <div>armor: {{ user.armor?.name ?? '-' }}</div>
+                    <div>weapon: {{ user.weapon?.name ?? '-' }}</div>
+                </div>
             </div>
         </div>
 
@@ -123,6 +130,8 @@ const { gameDay, gameTime } = useGameInfo()
             <Link :href="boat()">Docks</Link>
             <Link :href="jail()">Jail</Link>
             <Link :href="hospital()">Hospital</Link>
+            <Link :href="market()">Market</Link>
+            <Link :href="inventory()">Inventory</Link>
             <Link href="/admin">Admin</Link>
         </div>
 

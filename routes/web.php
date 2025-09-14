@@ -7,7 +7,9 @@ use App\Http\Controllers\DrugController;
 use App\Http\Controllers\FactoryController;
 use App\Http\Controllers\HookerController;
 use App\Http\Controllers\HospitalController;
+use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\JailController;
+use App\Http\Controllers\MarketController;
 use App\Http\Controllers\NightclubController;
 use App\Services\GameService;
 use Illuminate\Support\Facades\Route;
@@ -79,6 +81,22 @@ Route::prefix('/jail')->group(function () {
 Route::prefix('/hospital')->group(function () {
     Route::get('/', [HospitalController::class, 'index'])->name('hospital.index');
     Route::post('/release', [HospitalController::class, 'release'])->name('hospital.release');
+});
+
+Route::prefix('/market')->group(function () {
+    Route::get('/', [MarketController::class, 'index'])->name('market.index');
+    Route::get('/components', [MarketController::class, 'components'])->name('market.components');
+    Route::get('/components/{component}', [MarketController::class, 'componentsAuction'])->name('market.components.auction');
+    Route::get('/armors', [MarketController::class, 'armors'])->name('market.armors');
+    Route::get('/weapons', [MarketController::class, 'weapons'])->name('market.weapons');
+    Route::get('/items', [MarketController::class, 'items'])->name('market.items');
+    Route::post('/buy/{equipment}', [MarketController::class, 'buy'])->name('market.buy');
+});
+
+Route::prefix('inventory')->group(function () {
+    Route::get('/', [InventoryController::class, 'index'])->name('inventory.index');
+    Route::post('/activate/{equipment}', [InventoryController::class, 'activate'])->name('inventory.activate');
+    Route::post('/sell/{equipment}', [InventoryController::class, 'sell'])->name('inventory.sell');
 });
 
 Route::get('dashboard', function () {
