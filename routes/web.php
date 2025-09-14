@@ -72,6 +72,7 @@ Route::prefix('/boat')->group(function () {
 
 Route::prefix('/jail')->group(function () {
     Route::get('/', [JailController::class, 'index'])->name('jail.index');
+    Route::post('/bribe', [JailController::class, 'bribe'])->name('jail.bribe');
     Route::post('/release', [JailController::class, 'release'])->name('jail.release');
 });
 

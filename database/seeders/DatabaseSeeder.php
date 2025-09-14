@@ -23,7 +23,8 @@ class DatabaseSeeder extends Seeder
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
-
+        
+        User::factory(3)->create();
         Drug::factory(3)->create();
         Component::factory(3)->create();
         Factory::factory(3)->create();

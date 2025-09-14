@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CheckUserStatus
 {
-    protected array $allowedPaths = ['/', 'bank*'];
+    protected array $allowedPaths = ['/', 'admin*', 'bank*'];
 
     public function handle(Request $request, Closure $next): Response
     {

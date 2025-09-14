@@ -45,7 +45,8 @@ class GameService
 
     public static function createRound()
     {
-        self::resetData();
+        self::resetGameData();
+        self::resetUserData();
 
         BoatService::scheduleBoats();
 
@@ -57,7 +58,26 @@ class GameService
                 'start_time'  => time(),
             ]
         );
+    }
 
+    public static function getGameData()
+    {
+        return GameState::first();
+    }
+
+    public static function resetGameData()
+    {
+        Boat::query()->delete();
+        GameState::query()->delete();
+
+        DB::table('user_drugs')->delete();
+        DB::table('user_components')->delete();
+        DB::table('user_factories')->delete();
+        DB::table('user_hookers')->delete();
+    }
+
+    public static function resetUserData()
+    {
         User::query()->update([
             'cash' => 100000,
             'bank' => 0,
@@ -73,24 +93,9 @@ class GameService
             'intelligence' => 5,
             'charisma' => 5,
             'tolerance' => 5,
-
+            'jail_end_time' => null,
+            'hospital_end_time' => null,
         ]);
-    }
-
-    public static function getGameData()
-    {
-        return GameState::first();
-    }
-
-    public static function resetData()
-    {
-        Boat::query()->delete();
-        GameState::query()->delete();
-
-        DB::table('user_drugs')->delete();
-        DB::table('user_components')->delete();
-        DB::table('user_factories')->delete();
-        DB::table('user_hookers')->delete();
     }
 
     public static function regenerateStats(): void

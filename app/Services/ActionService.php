@@ -248,17 +248,20 @@ class ActionService
 
     public function releaseFromJail(): void
     {
+        $this->user->jail_end_time = null;
+        $this->user->save();
+    }
+
+    public function bribeJailGuard()
+    {
         DB::transaction(function () {
             $cost = $this->user->jail_release_cost;
 
             $this->user->validateFunds($this->user->jail_release_cost);
             $this->user->adjustCash(-$cost);
-            $this->user->jail_end_time = null;
-            $this->user->save();
+            $this->releaseFromJail();
         });
     }
-
-    public function bribeJailGuard() {}
 
     // ==================== HOSPITAL ======================
     public function detox($cost = 100)

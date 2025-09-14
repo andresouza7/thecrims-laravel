@@ -1,6 +1,6 @@
 <script setup>
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
-import { release } from '@/routes/jail'
+import { bribe } from '@/routes/jail'
 import { usePage, router, Form } from '@inertiajs/vue3'
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 
@@ -43,9 +43,6 @@ onUnmounted(() => {
   if (intervalId.value) clearInterval(intervalId.value)
 })
 
-const pay = () => {
-  router.post(route('jail.bribe'))
-}
 </script>
 
 <template>
@@ -61,7 +58,7 @@ const pay = () => {
             Tempo restante: <span class="font-semibold text-yellow-400">{{ remaining }}</span>
           </p>
 
-          <Form :action="release()" class="w-full">
+          <Form :action="bribe()" class="w-full">
             <button
               type="submit"
               class="bg-red-600 text-white py-2 px-4 w-full rounded-lg hover:bg-red-700 transition"
