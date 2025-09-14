@@ -2,11 +2,20 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Career extends Model
 {
-    public function users() {
+    use HasFactory;
+
+    public function users()
+    {
         return $this->hasMany(User::class);
+    }
+
+    public function levels()
+    {
+        return $this->hasMany(CareerLevel::class);
     }
 }

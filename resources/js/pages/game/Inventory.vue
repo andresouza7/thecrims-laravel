@@ -24,8 +24,6 @@ const activateItem = (itemId) => {
 const deactivateItem = (itemId) => {
     router.post(deactivate(itemId));
 };
-
-const isActiveWeapon = (id) => computed(() => user.value.weapon_id === id)
 </script>
 
 <template>

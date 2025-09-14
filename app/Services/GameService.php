@@ -80,6 +80,7 @@ class GameService
     public static function resetUserData()
     {
         User::query()->update([
+            'career_id' => null,
             'cash' => 100000,
             'bank' => 0,
             'health' => 50,

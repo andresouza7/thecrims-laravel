@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\CheckUserCareer;
 use App\Http\Middleware\CheckUserStatus;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
@@ -24,7 +25,8 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->use([
-            CheckUserStatus::class
+            CheckUserStatus::class,
+            CheckUserCareer::class,
         ]);
        
     })

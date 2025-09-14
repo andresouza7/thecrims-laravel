@@ -13,6 +13,7 @@ import { index as jail } from '@/routes/jail'
 import { index as hospital} from '@/routes/hospital'
 import { index as market } from '@/routes/market'
 import { index as inventory} from '@/routes/inventory'
+import { about } from '@/routes/career'
 import { useGameInfo } from '@/composables/useGameInfo'
 
 const page = usePage()
@@ -79,6 +80,7 @@ const { gameDay, gameTime } = useGameInfo()
                     <h4 class="font-medium">User data</h4>
                     <div v-if="user" class="text-sm">
                         <div>name: {{ user.name }}</div>
+                        <div>career: {{ user.career?.name }}</div>
                         <div>cash: {{ user.cash }}</div>
                         <div>bank: {{ user.bank }}</div>
                         <div>respect: {{ user.respect }}</div>
@@ -132,6 +134,7 @@ const { gameDay, gameTime } = useGameInfo()
             <Link :href="hospital()">Hospital</Link>
             <Link :href="market()">Market</Link>
             <Link :href="inventory()">Inventory</Link>
+            <Link :href="about()">About Career</Link>
             <Link href="/admin">Admin</Link>
         </div>
 

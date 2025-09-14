@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\BankController;
 use App\Http\Controllers\BoatController;
+use App\Http\Controllers\CareerController;
 use App\Http\Controllers\DrugController;
 use App\Http\Controllers\FactoryController;
 use App\Http\Controllers\HookerController;
@@ -98,6 +99,13 @@ Route::prefix('inventory')->group(function () {
     Route::post('/activate/{equipment}', [InventoryController::class, 'activate'])->name('inventory.activate');
     Route::post('/deactivate/{equipment}', [InventoryController::class, 'deactivate'])->name('inventory.deactivate');
     Route::post('/sell/{equipment}', [InventoryController::class, 'sell'])->name('inventory.sell');
+});
+
+Route::prefix('career')->group(function() {
+    Route::get('/', [CareerController::class, 'index'])->name('career.index');
+    Route::post('/', [CareerController::class, 'select'])->name('career.select');
+    Route::get('/tasks', [CareerController::class, 'tasks'])->name('career.tasks');
+    Route::get('/about', [CareerController::class, 'about'])->name('career.about');
 });
 
 Route::get('dashboard', function () {

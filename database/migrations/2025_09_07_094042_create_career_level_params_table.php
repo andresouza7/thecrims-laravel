@@ -11,15 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('career_levels', function (Blueprint $table) {
+        Schema::create('career_level_params', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('career_id')->constrained()->cascadeOnDelete();
-            $table->integer('level');
-            $table->string('name');
+            
+            $table->foreignId('career_level_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('game_param_id')->constrained()->cascadeOnDelete();
+            $table->unsignedBigInteger('value')->nullable();
             $table->timestamps();
-
-            // unique constraint para career_id + level
-            $table->unique(['career_id', 'level']);
         });
     }
 
@@ -28,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('career_levels');
+        Schema::dropIfExists('career_level_params');
     }
 };
