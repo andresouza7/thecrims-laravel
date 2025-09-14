@@ -23,6 +23,11 @@ class InventoryController extends Controller
         handleRequest(fn() => $game->action()->activateEquipment($equipment), 'equipment successfully activated!');
     }
 
+    public function deactivate(UserEquipment $equipment, GameFacade $game)
+    {
+        handleRequest(fn() => $game->action()->deactivateEquipment($equipment), 'equipment successfully deactivated!');
+    }
+
     public function sell(UserEquipment $equipment, GameFacade $game)
     {
         handleRequest(fn() => $game->action()->sell($equipment), 'equipment successfully sold!');

@@ -1,7 +1,12 @@
 <script setup>
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
-import { router } from '@inertiajs/vue3';
-import { sell, activate } from '@/routes/inventory';
+import { router, usePage } from '@inertiajs/vue3';
+import { sell, activate, deactivate } from '@/routes/inventory';
+import { computed } from 'vue';
+
+const page = usePage()
+
+const user = computed(() => page.props.user)
 
 const props = defineProps({
     armors: Array,
@@ -16,6 +21,11 @@ const sellItem = (itemId) => {
 const activateItem = (itemId) => {
     router.post(activate(itemId));
 };
+const deactivateItem = (itemId) => {
+    router.post(deactivate(itemId));
+};
+
+const isActiveWeapon = (id) => computed(() => user.value.weapon_id === id)
 </script>
 
 <template>
@@ -40,7 +50,11 @@ const activateItem = (itemId) => {
                         </div>
 
                         <div class="flex gap-2">
-                            <button @click="activateItem(armor.pivot.id)"
+                            <button v-if="user.weapon_id === armor.id" @click="deactivateItem(armor.pivot.id)"
+                                class="mt-4 bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-lg transition">
+                                Dectivate
+                            </button>
+                            <button v-else @click="activateItem(armor.pivot.id)"
                                 class="mt-4 bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-lg transition">
                                 Activate
                             </button>
@@ -69,7 +83,11 @@ const activateItem = (itemId) => {
                         </div>
 
                         <div class="flex gap-2">
-                            <button @click="activateItem(armor.pivot.id)"
+                            <button v-if="user.armor_id === armor.id" @click="deactivateItem(armor.pivot.id)"
+                                class="mt-4 bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-lg transition">
+                                Deactivate
+                            </button>
+                            <button v-else @click="activateItem(armor.pivot.id)"
                                 class="mt-4 bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-lg transition">
                                 Activate
                             </button>

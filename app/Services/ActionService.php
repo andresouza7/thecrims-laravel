@@ -78,6 +78,17 @@ class ActionService
         $this->user->save();
     }
 
+    public function deactivateEquipment(UserEquipment $userEquipment): void
+    {
+        if ($userEquipment->equipment->type === 'armor') {
+            $this->user->armor_id = null;
+        } else {
+            $this->user->weapon_id = null;
+        }
+
+        $this->user->save();
+    }
+
     public function fight(User $victim)
     {
         $attacker = $this->user;

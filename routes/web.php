@@ -96,6 +96,7 @@ Route::prefix('/market')->group(function () {
 Route::prefix('inventory')->group(function () {
     Route::get('/', [InventoryController::class, 'index'])->name('inventory.index');
     Route::post('/activate/{equipment}', [InventoryController::class, 'activate'])->name('inventory.activate');
+    Route::post('/deactivate/{equipment}', [InventoryController::class, 'deactivate'])->name('inventory.deactivate');
     Route::post('/sell/{equipment}', [InventoryController::class, 'sell'])->name('inventory.sell');
 });
 
