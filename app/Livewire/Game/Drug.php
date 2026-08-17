@@ -10,45 +10,44 @@ class Drug extends Component
 {
     protected $listeners = ['user-stats-updated' => '$refresh'];
 
-    public array $amounts = [];
+    public $selectedDrugId;
+    public $amount = 1;
 
-    public function sell($drugId, GameFacade $game)
+    public function sell(GameFacade $game)
     {
-        $amount = $this->amounts[$drugId] ?? 0;
-
-        if ($amount <= 0) {
-            session()->flash('error', 'Informe uma quantidade válida!');
+        if ($this->amount <= 0) {
+            $this->dispatch('toast', type: 'error', message: 'Informe uma quantidade válida!');
             return;
         }
 
         try {
-            $drug = DrugModel::findOrFail($drugId);
-            $game->action()->sell($drug, $amount);
+            $drug = DrugModel::findOrFail($this->selectedDrugId);
+            $game->action()->sell($drug, $this->amount);
             $this->dispatch('user-stats-updated');
-            session()->flash('message', 'Drogas vendidas com sucesso!');
+            $this->dispatch('toast', type: 'success', message: 'Drogas vendidas com sucesso!');
         } catch (\Throwable $th) {
-            session()->flash('error', $th->getMessage());
+            $this->dispatch('toast', type: 'error', message: $th->getMessage());
         }
     }
 
-    public function reward(GameFacade $game)
+    public function rewardItem(GameFacade $game)
     {
         try {
-            $drug = DrugModel::inRandomOrder()->first();
-            if ($drug) {
-                $game->action()->rewardItem($drug, 200);
-                $this->dispatch('user-stats-updated');
-                session()->flash('message', 'Drogas de recompensa adicionadas!');
-            }
+            $drug = DrugModel::findOrFail($this->selectedDrugId);
+            $game->action()->rewardItem($drug, $this->amount);
+            $this->dispatch('user-stats-updated');
+            $this->dispatch('toast', type: 'success', message: 'Drogas de recompensa adicionadas!');
         } catch (\Throwable $th) {
-            session()->flash('error', $th->getMessage());
+            $this->dispatch('toast', type: 'error', message: $th->getMessage());
         }
     }
 
     public function render(GameFacade $game)
     {
+        $drugs = DrugModel::orderBy('name')->get();
+
         return view('livewire.game.drug', [
-            'drugs' => $game->user->drugs,
+            'drugs' => $drugs,
         ]);
     }
 }

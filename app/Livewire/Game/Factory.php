@@ -15,9 +15,9 @@ class Factory extends Component
             $factory = FactoryModel::findOrFail($factoryId);
             $game->action()->buy($factory);
             $this->dispatch('user-stats-updated');
-            session()->flash('message', 'Fábrica comprada com sucesso!');
+            $this->dispatch('toast', type: 'success', message: 'Fábrica comprada com sucesso!');
         } catch (\Throwable $th) {
-            session()->flash('error', $th->getMessage());
+            $this->dispatch('toast', type: 'error', message: $th->getMessage());
         }
     }
 
@@ -27,9 +27,9 @@ class Factory extends Component
             $userFactory = UserFactory::findOrFail($userFactoryId);
             $game->action()->sell($userFactory);
             $this->dispatch('user-stats-updated');
-            session()->flash('message', 'Fábrica vendida com sucesso!');
+            $this->dispatch('toast', type: 'success', message: 'Fábrica vendida com sucesso!');
         } catch (\Throwable $th) {
-            session()->flash('error', $th->getMessage());
+            $this->dispatch('toast', type: 'error', message: $th->getMessage());
         }
     }
 
@@ -39,9 +39,9 @@ class Factory extends Component
             $userFactory = UserFactory::findOrFail($userFactoryId);
             $game->action()->upgradeFactory($userFactory);
             $this->dispatch('user-stats-updated');
-            session()->flash('message', 'Fábrica atualizada com sucesso!');
+            $this->dispatch('toast', type: 'success', message: 'Fábrica atualizada com sucesso!');
         } catch (\Throwable $th) {
-            session()->flash('error', $th->getMessage());
+            $this->dispatch('toast', type: 'error', message: $th->getMessage());
         }
     }
 
@@ -50,9 +50,9 @@ class Factory extends Component
         try {
             $game->action()->collectFactoryProduction();
             $this->dispatch('user-stats-updated');
-            session()->flash('message', 'Unidades coletadas com sucesso!');
+            $this->dispatch('toast', type: 'success', message: 'Unidades coletadas com sucesso!');
         } catch (\Throwable $th) {
-            session()->flash('error', $th->getMessage());
+            $this->dispatch('toast', type: 'error', message: $th->getMessage());
         }
     }
 

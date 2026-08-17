@@ -47,7 +47,6 @@
                 <div><span class="text-gray-400">Nome:</span> <span class="font-semibold text-white">{{ $user->name }}</span></div>
                 <div><span class="text-gray-400">Carreira:</span> <span class="text-amber-400 font-medium">{{ $user->career?->name ?? 'Nenhuma' }}</span></div>
                 <div><span class="text-gray-400">Grana:</span> <span class="text-emerald-400 font-semibold">${{ number_format($user->cash) }}</span></div>
-                <div><span class="text-gray-400">Banco:</span> <span class="text-blue-400 font-semibold">${{ number_format($user->bank) }}</span></div>
                 <div><span class="text-gray-400">Respeito:</span> <span class="text-yellow-400 font-semibold">{{ number_format($user->respect) }}</span></div>
                 @if ($user->in_jail)
                     <div class="text-xs text-rose-400 font-semibold mt-1">🔒 Preso até: {{ $user->jail_end_time }}</div>

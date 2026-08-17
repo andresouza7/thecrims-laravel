@@ -29,9 +29,9 @@ class Lab extends Component
             $game->action()->createLabProduction($this->userFactory, $this->component_id, $this->amount);
             $this->reset(['amount', 'component_id']);
             $this->dispatch('user-stats-updated');
-            session()->flash('message', 'Produção iniciada no laboratório!');
+            $this->dispatch('toast', type: 'success', message: 'Produção iniciada no laboratório!');
         } catch (\Throwable $th) {
-            session()->flash('error', $th->getMessage());
+            $this->dispatch('toast', type: 'error', message: $th->getMessage());
         }
     }
 
@@ -41,9 +41,9 @@ class Lab extends Component
             $production = LabProduction::findOrFail($productionId);
             $game->action()->cancelLabProduction($production);
             $this->dispatch('user-stats-updated');
-            session()->flash('message', 'Produção cancelada!');
+            $this->dispatch('toast', type: 'success', message: 'Produção cancelada!');
         } catch (\Throwable $th) {
-            session()->flash('error', $th->getMessage());
+            $this->dispatch('toast', type: 'error', message: $th->getMessage());
         }
     }
 
@@ -53,9 +53,9 @@ class Lab extends Component
             $production = LabProduction::findOrFail($productionId);
             $game->action()->claimLabProduction($production);
             $this->dispatch('user-stats-updated');
-            session()->flash('message', 'Drogas coletadas com sucesso!');
+            $this->dispatch('toast', type: 'success', message: 'Drogas coletadas com sucesso!');
         } catch (\Throwable $th) {
-            session()->flash('error', $th->getMessage());
+            $this->dispatch('toast', type: 'error', message: $th->getMessage());
         }
     }
 

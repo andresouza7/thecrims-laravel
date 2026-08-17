@@ -13,17 +13,7 @@
         @endif
     </div>
 
-    @if (session()->has('message'))
-        <div class="p-3 bg-emerald-900/50 border border-emerald-700 text-emerald-300 rounded text-xs">
-            {{ session('message') }}
-        </div>
-    @endif
 
-    @if (session()->has('error'))
-        <div class="p-3 bg-rose-900/50 border border-rose-700 text-rose-300 rounded text-xs">
-            {{ session('error') }}
-        </div>
-    @endif
 
     @if ($userCareer)
         <div class="p-5 bg-gray-900 border border-gray-800 rounded-xl space-y-6">

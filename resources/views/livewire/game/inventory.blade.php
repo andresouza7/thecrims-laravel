@@ -6,17 +6,7 @@
         </div>
     </div>
 
-    @if (session()->has('message'))
-        <div class="p-3 bg-emerald-900/50 border border-emerald-700 text-emerald-300 rounded text-xs">
-            {{ session('message') }}
-        </div>
-    @endif
 
-    @if (session()->has('error'))
-        <div class="p-3 bg-rose-900/50 border border-rose-700 text-rose-300 rounded text-xs">
-            {{ session('error') }}
-        </div>
-    @endif
 
     <!-- Armaduras -->
     <div class="space-y-4">

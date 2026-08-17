@@ -12,9 +12,9 @@ class Hospital extends Component
         try {
             $game->action()->releaseFromHospital();
             $this->dispatch('user-stats-updated');
-            session()->flash('message', 'Você está saudável de novo!');
+            $this->dispatch('toast', type: 'success', message: 'Você está saudável de novo!');
         } catch (\Throwable $th) {
-            session()->flash('error', $th->getMessage());
+            $this->dispatch('toast', type: 'error', message: $th->getMessage());
         }
     }
 

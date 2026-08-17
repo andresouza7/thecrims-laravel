@@ -16,9 +16,9 @@ class Index extends Component
             $equipment = Equipment::findOrFail($equipmentId);
             $game->action()->buy($equipment);
             $this->dispatch('user-stats-updated');
-            session()->flash('message', 'Equipamento comprado com sucesso!');
+            $this->dispatch('toast', type: 'success', message: 'Equipamento comprado com sucesso!');
         } catch (\Throwable $th) {
-            session()->flash('error', $th->getMessage());
+            $this->dispatch('toast', type: 'error', message: $th->getMessage());
         }
     }
 

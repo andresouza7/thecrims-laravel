@@ -36,9 +36,9 @@ class About extends Component
                 'career_level_id' => $level1?->id,
             ]);
             $this->dispatch('user-stats-updated');
-            session()->flash('message', 'Carreira escolhida com sucesso!');
+            $this->dispatch('toast', type: 'success', message: 'Carreira escolhida com sucesso!');
         } catch (\Throwable $th) {
-            session()->flash('error', $th->getMessage());
+            $this->dispatch('toast', type: 'error', message: $th->getMessage());
         }
     }
 
@@ -47,9 +47,9 @@ class About extends Component
         try {
             $careerService->levelUp($game->user);
             $this->dispatch('user-stats-updated');
-            session()->flash('message', 'Parabéns! Você subiu de nível na sua carreira e recebeu suas recompensas!');
+            $this->dispatch('toast', type: 'success', message: 'Parabéns! Você subiu de nível na sua carreira e recebeu suas recompensas!');
         } catch (\Throwable $th) {
-            session()->flash('error', $th->getMessage());
+            $this->dispatch('toast', type: 'error', message: $th->getMessage());
         }
     }
 

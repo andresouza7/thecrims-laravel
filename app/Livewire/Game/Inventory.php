@@ -16,9 +16,9 @@ class Inventory extends Component
             $userEquipment = UserEquipment::where('user_id', $game->user->id)->findOrFail($userEquipmentId);
             $game->action()->activateEquipment($userEquipment);
             $this->dispatch('user-stats-updated');
-            session()->flash('message', 'Equipamento equipado com sucesso!');
+            $this->dispatch('toast', type: 'success', message: 'Equipamento equipado com sucesso!');
         } catch (\Throwable $th) {
-            session()->flash('error', $th->getMessage());
+            $this->dispatch('toast', type: 'error', message: $th->getMessage());
         }
     }
 
@@ -28,9 +28,9 @@ class Inventory extends Component
             $userEquipment = UserEquipment::where('user_id', $game->user->id)->findOrFail($userEquipmentId);
             $game->action()->deactivateEquipment($userEquipment);
             $this->dispatch('user-stats-updated');
-            session()->flash('message', 'Equipamento desequipado com sucesso!');
+            $this->dispatch('toast', type: 'success', message: 'Equipamento desequipado com sucesso!');
         } catch (\Throwable $th) {
-            session()->flash('error', $th->getMessage());
+            $this->dispatch('toast', type: 'error', message: $th->getMessage());
         }
     }
 
@@ -40,9 +40,9 @@ class Inventory extends Component
             $userEquipment = UserEquipment::where('user_id', $game->user->id)->findOrFail($userEquipmentId);
             $game->action()->sell($userEquipment);
             $this->dispatch('user-stats-updated');
-            session()->flash('message', 'Equipamento vendido com sucesso!');
+            $this->dispatch('toast', type: 'success', message: 'Equipamento vendido com sucesso!');
         } catch (\Throwable $th) {
-            session()->flash('error', $th->getMessage());
+            $this->dispatch('toast', type: 'error', message: $th->getMessage());
         }
     }
 

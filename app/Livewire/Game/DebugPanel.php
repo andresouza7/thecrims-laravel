@@ -102,7 +102,7 @@ class DebugPanel extends Component
         $user->save();
 
         $this->dispatch('user-stats-updated');
-        session()->flash('debug_msg', 'Atributos salvos!');
+        $this->dispatch('toast', type: 'info', message: 'Atributos salvos!');
     }
 
     public function updateDrug(GameFacade $game)
@@ -119,7 +119,7 @@ class DebugPanel extends Component
         );
 
         $this->dispatch('user-stats-updated');
-        session()->flash('debug_msg', 'Droga atualizada!');
+        $this->dispatch('toast', type: 'info', message: 'Droga atualizada!');
     }
 
     public function updateHooker(GameFacade $game)
@@ -135,7 +135,7 @@ class DebugPanel extends Component
         );
 
         $this->dispatch('user-stats-updated');
-        session()->flash('debug_msg', 'Prostituta atualizada!');
+        $this->dispatch('toast', type: 'info', message: 'Prostituta atualizada!');
     }
 
     public function toggleEquipment(GameFacade $game)
@@ -145,13 +145,13 @@ class DebugPanel extends Component
         $existing = UserEquipment::where('user_id', $game->user->id)->where('equipment_id', $this->selectedEquipmentId)->first();
         if ($existing) {
             $existing->delete();
-            session()->flash('debug_msg', 'Equipamento removido!');
+            $this->dispatch('toast', type: 'info', message: 'Equipamento removido!');
         } else {
             UserEquipment::create([
                 'user_id' => $game->user->id,
                 'equipment_id' => $this->selectedEquipmentId,
             ]);
-            session()->flash('debug_msg', 'Equipamento adicionado!');
+            $this->dispatch('toast', type: 'info', message: 'Equipamento adicionado!');
         }
 
         $this->dispatch('user-stats-updated');
@@ -166,7 +166,7 @@ class DebugPanel extends Component
         $nextLevel = CareerLevel::where('career_id', $user->career_id)->where('level', $currentLevelNum + 1)->first();
 
         if (!$nextLevel) {
-            session()->flash('debug_msg', 'Usuário já está no nível máximo!');
+            $this->dispatch('toast', type: 'info', message: 'Usuário já está no nível máximo!');
             return;
         }
 
@@ -174,59 +174,92 @@ class DebugPanel extends Component
 
         foreach ($requirements as $clp) {
             $param = $clp->game_param;
-            $target = $param?->target;
-            $needed = $clp->value;
+            if (!$param) continue;
+
+            $needed = (int) $clp->value;
 
             switch ($param->name) {
-                case 'cash':
-                    $user->cash = max($user->cash, $needed);
-                    break;
                 case 'respect':
-                    // Respect is calculated from cash / stats
-                    $user->cash = max($user->cash, $needed * 30000);
+                    $user->user_respect = max((int)$user->user_respect, $needed);
                     break;
-                case 'stats_total':
-                    $each = (int) ceil($needed / 4);
-                    $user->strength = max($user->strength, $each);
-                    $user->tolerance = max($user->tolerance, $each);
-                    $user->charisma = max($user->charisma, $each);
-                    $user->intelligence = max($user->intelligence, $each);
+                case 'cash':
+                    $user->cash = max((int)$user->cash, $needed);
+                    break;
+                case 'bank':
+                    $user->bank = max((int)$user->bank, $needed);
+                    break;
+                case 'strength':
+                    $user->strength = max((int)$user->strength, $needed);
+                    break;
+                case 'intelligence':
+                    $user->intelligence = max((int)$user->intelligence, $needed);
+                    break;
+                case 'charisma':
+                    $user->charisma = max((int)$user->charisma, $needed);
+                    break;
+                case 'tolerance':
+                    $user->tolerance = max((int)$user->tolerance, $needed);
                     break;
                 case 'drug_sold':
-                    if ($target instanceof Drug) {
+                case 'drug_produced':
+                    if ($param->target_type === 'drug' && $param->target_id) {
                         DB::table('user_drugs')->updateOrInsert(
-                            ['user_id' => $user->id, 'drug_id' => $target->id],
+                            ['user_id' => $user->id, 'drug_id' => $param->target_id],
                             ['total_sold' => $needed, 'updated_at' => now()]
                         );
                     }
                     break;
                 case 'equipment_owned':
-                    if ($target instanceof Equipment) {
+                    if ($param->target_type === 'equipment' && $param->target_id) {
                         UserEquipment::firstOrCreate([
                             'user_id' => $user->id,
-                            'equipment_id' => $target->id,
+                            'equipment_id' => $param->target_id,
                         ]);
                     }
                     break;
                 case 'hookers_count':
-                    $hooker = Hooker::first();
-                    if ($hooker) {
-                        $userHooker = DB::table('user_hookers')->where('user_id', $user->id)->where('hooker_id', $hooker->id)->first();
-                        $currentTotal = DB::table('user_hookers')->where('user_id', $user->id)->sum('amount');
-                        if ($currentTotal < $needed) {
-                            $diff = $needed - $currentTotal;
-                            $newAmount = ($userHooker ? $userHooker->amount : 0) + $diff;
-                            DB::table('user_hookers')->updateOrInsert(
-                                ['user_id' => $user->id, 'hooker_id' => $hooker->id],
-                                ['amount' => $newAmount, 'updated_at' => now()]
-                            );
+                    $currentHookersCount = DB::table('user_hookers')->where('user_id', $user->id)->sum('amount');
+                    if ($currentHookersCount < $needed) {
+                        $hooker = \App\Models\Hooker::first();
+                        if ($hooker) {
+                            $diff = $needed - $currentHookersCount;
+                            $userHooker = DB::table('user_hookers')->where('user_id', $user->id)->where('hooker_id', $hooker->id)->first();
+                            if ($userHooker) {
+                                DB::table('user_hookers')->where('id', $userHooker->id)->increment('amount', $diff);
+                            } else {
+                                DB::table('user_hookers')->insert([
+                                    'user_id' => $user->id,
+                                    'hooker_id' => $hooker->id,
+                                    'amount' => $diff,
+                                    'created_at' => now(),
+                                    'updated_at' => now(),
+                                ]);
+                            }
                         }
                     }
                     break;
-                case 'hooker_type_owned':
-                    if ($target instanceof Hooker) {
-                        DB::table('user_hookers')->updateOrInsert(
-                            ['user_id' => $user->id, 'hooker_id' => $target->id],
+                case 'factories_count':
+                    $currentFactoriesCount = DB::table('user_factories')->where('user_id', $user->id)->count();
+                    if ($currentFactoriesCount < $needed) {
+                        $factory = \App\Models\Factory::first();
+                        if ($factory) {
+                            for ($i = 0; $i < ($needed - $currentFactoriesCount); $i++) {
+                                DB::table('user_factories')->insert([
+                                    'user_id' => $user->id,
+                                    'factory_id' => $factory->id,
+                                    'level' => 1,
+                                    'stash' => 0,
+                                    'created_at' => now(),
+                                    'updated_at' => now(),
+                                ]);
+                            }
+                        }
+                    }
+                    break;
+                default:
+                    if ($param->target_type === 'drug' && $param->target_id) {
+                        DB::table('user_drugs')->updateOrInsert(
+                            ['user_id' => $user->id, 'drug_id' => $param->target_id],
                             ['amount' => $needed, 'updated_at' => now()]
                         );
                     }
@@ -237,7 +270,7 @@ class DebugPanel extends Component
         $user->save();
         $this->loadCurrentValues();
         $this->dispatch('user-stats-updated');
-        session()->flash('debug_msg', "Requisitos do Nível " . ($currentLevelNum + 1) . " preenchidos!");
+        $this->dispatch('toast', type: 'info', message: "Requisitos do Nível " . ($currentLevelNum + 1) . " preenchidos!");
     }
 
     public function resetCareerLevel(GameFacade $game)

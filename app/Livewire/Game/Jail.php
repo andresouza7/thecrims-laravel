@@ -12,9 +12,9 @@ class Jail extends Component
         try {
             $game->action()->bribeJailGuard();
             $this->dispatch('user-stats-updated');
-            session()->flash('message', 'Você pagou o do lanche e está livre por enquanto!');
+            $this->dispatch('toast', type: 'success', message: 'Você pagou o do lanche e está livre por enquanto!');
         } catch (\Throwable $th) {
-            session()->flash('error', $th->getMessage());
+            $this->dispatch('toast', type: 'error', message: $th->getMessage());
         }
     }
 
@@ -23,9 +23,9 @@ class Jail extends Component
         try {
             $game->action()->releaseFromJail();
             $this->dispatch('user-stats-updated');
-            session()->flash('message', 'Você está livre de novo!');
+            $this->dispatch('toast', type: 'success', message: 'Você está livre de novo!');
         } catch (\Throwable $th) {
-            session()->flash('error', $th->getMessage());
+            $this->dispatch('toast', type: 'error', message: $th->getMessage());
         }
     }
 

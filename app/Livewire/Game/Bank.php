@@ -9,42 +9,56 @@ class Bank extends Component
 {
     protected $listeners = ['user-stats-updated' => '$refresh'];
 
-    public $amount = '';
+    public string $operation = 'deposit';
+    public $amount = 0;
 
-    public function deposit(GameFacade $game)
+    public function executeTransaction(GameFacade $game)
     {
         $this->validate([
-            'amount' => 'required|numeric|min:1',
+            'operation' => 'required|in:deposit,withdraw',
+            'amount' => 'nullable|numeric|min:0',
         ]);
 
         try {
-            $game->action()->deposit($this->amount);
-            $this->reset('amount');
-            $this->dispatch('user-stats-updated');
-            session()->flash('message', 'Depósito efetuado com sucesso!');
+            $user = $game->user;
+            $val = (int) ($this->amount ?: 0);
+
+            if ($this->operation === 'deposit') {
+                if ($val <= 0) {
+                    $val = $user->cash;
+                }
+
+                if ($val <= 0) {
+                    throw new \RuntimeException("Você não possui dinheiro em mãos para depositar!");
+                }
+
+                $game->action()->deposit($val);
+                $this->amount = 0;
+                $this->dispatch('user-stats-updated');
+                $this->dispatch('toast', type: 'success', message: "Depósito de $" . number_format($val) . " efetuado com sucesso!");
+            } else {
+                if ($val <= 0) {
+                    $val = $user->bank;
+                }
+
+                if ($val <= 0) {
+                    throw new \RuntimeException("Você não possui dinheiro no banco para sacar!");
+                }
+
+                $game->action()->withdraw($val);
+                $this->amount = 0;
+                $this->dispatch('user-stats-updated');
+                $this->dispatch('toast', type: 'success', message: "Saque de $" . number_format($val) . " realizado com sucesso!");
+            }
         } catch (\Throwable $th) {
-            session()->flash('error', $th->getMessage());
+            $this->dispatch('toast', type: 'error', message: $th->getMessage());
         }
     }
 
-    public function withdraw(GameFacade $game)
+    public function render(GameFacade $game)
     {
-        $this->validate([
-            'amount' => 'required|numeric|min:1',
+        return view('livewire.game.bank', [
+            'user' => $game->user,
         ]);
-
-        try {
-            $game->action()->withdraw($this->amount);
-            $this->reset('amount');
-            $this->dispatch('user-stats-updated');
-            session()->flash('message', 'Saque realizado com sucesso!');
-        } catch (\Throwable $th) {
-            session()->flash('error', $th->getMessage());
-        }
-    }
-
-    public function render()
-    {
-        return view('livewire.game.bank');
     }
 }

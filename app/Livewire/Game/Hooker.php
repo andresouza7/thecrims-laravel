@@ -20,9 +20,9 @@ class Hooker extends Component
             $hooker = HookerModel::findOrFail($hookerId);
             $game->action()->buy($hooker, $amount);
             $this->dispatch('user-stats-updated');
-            session()->flash('message', 'Prostitutas compradas com sucesso!');
+            $this->dispatch('toast', type: 'success', message: 'Prostitutas compradas com sucesso!');
         } catch (\Throwable $th) {
-            session()->flash('error', $th->getMessage());
+            $this->dispatch('toast', type: 'error', message: $th->getMessage());
         }
     }
 
@@ -34,9 +34,9 @@ class Hooker extends Component
             $hooker = HookerModel::findOrFail($hookerId);
             $game->action()->sell($hooker, $amount);
             $this->dispatch('user-stats-updated');
-            session()->flash('message', 'Prostitutas vendidas com sucesso!');
+            $this->dispatch('toast', type: 'success', message: 'Prostitutas vendidas com sucesso!');
         } catch (\Throwable $th) {
-            session()->flash('error', $th->getMessage());
+            $this->dispatch('toast', type: 'error', message: $th->getMessage());
         }
     }
 
@@ -45,9 +45,9 @@ class Hooker extends Component
         try {
             $game->action()->collectHookerIncome();
             $this->dispatch('user-stats-updated');
-            session()->flash('message', 'Renda das prostitutas coletada com sucesso!');
+            $this->dispatch('toast', type: 'success', message: 'Renda das prostitutas coletada com sucesso!');
         } catch (\Throwable $th) {
-            session()->flash('error', $th->getMessage());
+            $this->dispatch('toast', type: 'error', message: $th->getMessage());
         }
     }
 
