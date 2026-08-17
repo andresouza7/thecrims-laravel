@@ -13,9 +13,10 @@ class Factory extends Component
     {
         try {
             $factory = FactoryModel::findOrFail($factoryId);
-            $game->action()->buy($factory);
+            $totalCost = $game->action()->buy($factory);
+            $formattedTotal = number_format($totalCost);
             $this->dispatch('user-stats-updated');
-            $this->dispatch('toast', type: 'success', message: 'Fábrica comprada com sucesso!');
+            $this->dispatch('toast', type: 'success', message: "Fábrica {$factory->name} comprada por \${$formattedTotal} com sucesso!");
         } catch (\Throwable $th) {
             $this->dispatch('toast', type: 'error', message: $th->getMessage());
         }
@@ -25,9 +26,11 @@ class Factory extends Component
     {
         try {
             $userFactory = UserFactory::findOrFail($userFactoryId);
-            $game->action()->sell($userFactory);
+            $factoryName = $userFactory->factory->name;
+            $totalProfit = $game->action()->sell($userFactory);
+            $formattedTotal = number_format($totalProfit);
             $this->dispatch('user-stats-updated');
-            $this->dispatch('toast', type: 'success', message: 'Fábrica vendida com sucesso!');
+            $this->dispatch('toast', type: 'success', message: "Fábrica {$factoryName} vendida por \${$formattedTotal} com sucesso!");
         } catch (\Throwable $th) {
             $this->dispatch('toast', type: 'error', message: $th->getMessage());
         }
@@ -37,9 +40,10 @@ class Factory extends Component
     {
         try {
             $userFactory = UserFactory::findOrFail($userFactoryId);
-            $game->action()->upgradeFactory($userFactory);
+            $cost = $game->action()->upgradeFactory($userFactory);
+            $formattedCost = number_format($cost);
             $this->dispatch('user-stats-updated');
-            $this->dispatch('toast', type: 'success', message: 'Fábrica atualizada com sucesso!');
+            $this->dispatch('toast', type: 'success', message: "Fábrica evoluída por \${$formattedCost} com sucesso!");
         } catch (\Throwable $th) {
             $this->dispatch('toast', type: 'error', message: $th->getMessage());
         }
@@ -50,7 +54,7 @@ class Factory extends Component
         try {
             $game->action()->collectFactoryProduction();
             $this->dispatch('user-stats-updated');
-            $this->dispatch('toast', type: 'success', message: 'Unidades coletadas com sucesso!');
+            $this->dispatch('toast', type: 'success', message: 'Estoque da fábrica coletado com sucesso!');
         } catch (\Throwable $th) {
             $this->dispatch('toast', type: 'error', message: $th->getMessage());
         }

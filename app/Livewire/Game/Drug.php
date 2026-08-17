@@ -23,10 +23,11 @@ class Drug extends Component
 
         try {
             $drug = DrugModel::findOrFail($drugId);
-            $game->action()->sell($drug, $amount);
+            $totalProfit = $game->action()->sell($drug, $amount);
+            $formattedProfit = number_format($totalProfit);
             $this->amounts[$drugId] = '';
             $this->dispatch('user-stats-updated');
-            $this->dispatch('toast', type: 'success', message: "Venda de {$amount}x {$drug->name} efetuada com sucesso!");
+            $this->dispatch('toast', type: 'success', message: "Venda de {$amount}x {$drug->name} por \${$formattedProfit} efetuada com sucesso!");
         } catch (\Throwable $th) {
             $this->dispatch('toast', type: 'error', message: $th->getMessage());
         }

@@ -17,7 +17,7 @@ class ActionService
 {
     public function __construct(protected User $user) {}
 
-    public function deposit(int $amount): void
+    public function deposit(int $amount): int
     {
         if ($amount <= 0 || $this->user->cash < $amount) {
             throw new \RuntimeException('Not enough funds to make deposit');
@@ -27,9 +27,11 @@ class ActionService
             $this->user->adjustCash(-$amount);
             $this->user->increment('bank', $amount);
         });
+
+        return $amount;
     }
 
-    public function withdraw(int $amount): void
+    public function withdraw(int $amount): int
     {
         if ($amount <= 0 || $this->user->bank < $amount) {
             throw new \RuntimeException('Not enough funds to withdraw');
@@ -39,26 +41,31 @@ class ActionService
             $this->user->adjustCash($amount);
             $this->user->decrement('bank', $amount);
         });
+
+        return $amount;
     }
 
-    public function buy(Buyable $item, int $quantity = 1): void
+    public function buy(Buyable $item, int $quantity = 1): int
     {
-        DB::transaction(function () use ($item, $quantity) {
+        return DB::transaction(function () use ($item, $quantity) {
             $cost = $item->getPrice() * $quantity;
 
             $this->user->validateFunds($cost);
             $this->user->adjustCash(-$cost);
 
             $item->addToUser($this->user, $quantity);
+
+            return $cost;
         });
     }
 
-    public function sell(Sellable $item, int $quantity = 1): void
+    public function sell(Sellable $item, int $quantity = 1): int
     {
-        DB::transaction(function () use ($item, $quantity) {
+        return DB::transaction(function () use ($item, $quantity) {
             $item->validateInventory($this->user, $quantity);
 
-            $profit = $item->getPrice() * $quantity;
+            // sell price is only half of buy price
+            $profit = (int) floor(($item->getPrice() * $quantity) / 2);
 
             $this->user->adjustCash($profit);
             $item->removeFromUser($this->user, $quantity);
@@ -66,6 +73,8 @@ class ActionService
             if ($item instanceof \App\Models\Drug) {
                 $this->user->increment('drug_profits', $profit);
             }
+
+            return $profit;
         });
     }
 
@@ -106,76 +115,42 @@ class ActionService
             $userEquipment->active = false;
             $userEquipment->save();
 
-            if ($type === 'armor' && $user->armor_id === $userEquipment->equipment_id) {
+            if ($type === 'armor') {
                 $user->armor_id = null;
-            } elseif ($type !== 'armor' && $user->weapon_id === $userEquipment->equipment_id) {
+            } else {
                 $user->weapon_id = null;
             }
             $user->save();
         });
     }
 
-    public function fight(User $victim)
+    // ==================== VITAL REGEN ======================
+    public function restoreVital(VitalType $vital, int $amount): void
     {
-        $attacker = $this->user;
 
-        $winner = null;
-        $loser = null;
-        $rewardCash = 0;
+        DB::transaction(function () use ($vital, $amount) {
+            $cost = $amount * 10;
+            $this->user->validateFunds($cost);
 
-        DB::transaction(function () use ($attacker, $victim, &$winner, &$loser, &$rewardCash) {
-            if ($attacker->health < 10) {
-                throw new \Exception("Too weak to perform this action.");
+            switch ($vital) {
+                case VitalType::Health:
+                    $this->user->health = min($this->user->max_health, $this->user->health + $amount);
+                    break;
+                case VitalType::Stamina:
+                    $this->user->stamina = min(100, $this->user->stamina + $amount);
+                    break;
+
+                case VitalType::Addiction:
+                    $this->user->addiction = max(0, $this->user->addiction - $amount);
+                    break;
+
+                default:
+                    throw new \InvalidArgumentException("Invalid vital type: {$vital->value}");
             }
+            $this->user->adjustCash(-$cost);
 
-            // Check stamina
-            $staminaCost = 20;
-            if ($attacker->stamina < $staminaCost) {
-                throw new \Exception("Not enough stamina to perform this action.");
-            }
-
-            // Reduce attacker stamina
-            $attacker->adjustVitals(VitalType::STAMINA, -$staminaCost);
-
-            // Randomize slightly to avoid deterministic outcome
-            $attackerRoll = $attacker->assault_power + rand(0, 10);
-            $victimRoll   = $victim->assault_power + rand(0, 10);
-
-            $winner = $attackerRoll >= $victimRoll ? $attacker : $victim;
-            $loser  = $winner->is($attacker) ? $victim : $attacker;
-
-            // Apply health loss
-            $winner->setVitals(VitalType::HEALTH, max(1, $winner->health - rand(5, 15)));
-            $loser->setVitals(VitalType::HEALTH, 0);
-
-            $rewardCash = 0;
-            // If attacker wins, reward them
-            if ($winner->is($attacker)) {
-                $rewardCash = (int) ($victim->cash * 0.1); // Take victim's cash
-                $attacker->adjustCash($rewardCash);
-                $victim->adjustCash(-$rewardCash);
-
-                // Reward stats
-                $statReward = 2; // Example: 2 points each
-                $attacker->adjustStats($statReward);
-
-                // Register kill
-                DB::table('user_kills')->insert([
-                    'killer_id' => $attacker->id,
-                    'victim_id' => $victim->id,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-            } else {
-                $this->sendToHospital();
-            }
+            $this->user->save();
         });
-
-        return [
-            'winner' => $winner ? $winner->id : null,
-            'loser' => $loser ? $loser->id : null,
-            'rewardCash' => $rewardCash,
-        ];
     }
 
     public function rewardItem(Buyable $item, int $quantity): void
@@ -184,16 +159,17 @@ class ActionService
     }
 
     // ==================== FACTORY ======================
-    public function upgradeFactory(UserFactory $userFactory): void
+    public function upgradeFactory(UserFactory $userFactory): int
     {
-        DB::transaction(function () use ($userFactory) {
-            $cost = 2000;
-
+        $cost = 2000;
+        DB::transaction(function () use ($userFactory, $cost) {
             $this->user->validateFunds($cost);
             $this->user->adjustCash(-$cost);
 
             $userFactory->levelUp($cost);
         });
+
+        return $cost;
     }
 
     public function collectFactoryProduction()
@@ -273,7 +249,7 @@ class ActionService
     }
 
     // ==================== HOOKER ======================
-    public function collectHookerIncome()
+    public function collectHookerIncome(): int
     {
         $income = $this->user->hooker_income;
 
@@ -286,6 +262,8 @@ class ActionService
             $this->user->increment('hooker_profits', $income);
             DB::table('user_hookers')->where('user_id', $this->user->id)->update(['available_income' => 0]);
         });
+
+        return $income;
     }
 
     // ==================== JAIL ======================
@@ -301,39 +279,28 @@ class ActionService
         $this->user->save();
     }
 
-    public function bribeJailGuard()
+    public function bribeJailGuard(): void
     {
-        DB::transaction(function () {
-            $cost = $this->user->jail_release_cost;
+        $cost = $this->user->jail_release_cost;
 
-            $this->user->validateFunds($this->user->jail_release_cost);
+        $this->user->validateFunds($cost);
+
+        DB::transaction(function () use ($cost) {
             $this->user->adjustCash(-$cost);
             $this->releaseFromJail();
         });
     }
 
     // ==================== HOSPITAL ======================
-    public function detox($cost = 100)
-    {
-        $this->user->validateFunds($cost);
-        $this->user->setVitals(VitalType::STAMINA, 100);
-    }
-
-    public function sendToHospital(int $minutes = 15)
+    public function sendToHospital(int $minutes = 30): void
     {
         $this->user->hospital_end_time = Carbon::now()->addMinutes($minutes);
         $this->user->save();
     }
 
-    public function releaseFromHospital()
+    public function releaseFromHospital(): void
     {
-        DB::transaction(function () {
-            $cost = $this->user->hospital_release_cost;
-
-            $this->user->validateFunds($cost);
-            $this->user->adjustCash(-$cost);
-            $this->user->hospital_end_time = null;
-            $this->user->save();
-        });
+        $this->user->hospital_end_time = null;
+        $this->user->save();
     }
 }

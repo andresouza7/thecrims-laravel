@@ -10,17 +10,21 @@ class Hooker extends Component
 {
     protected $listeners = ['user-stats-updated' => '$refresh'];
 
-    public array $amounts = [];
+    public array $buyAmounts = [];
+    public array $sellAmounts = [];
 
     public function buyHooker($hookerId, GameFacade $game)
     {
-        $amount = $this->amounts[$hookerId] ?? 1;
+        $amount = (int) ($this->buyAmounts[$hookerId] ?? 1);
+        if ($amount <= 0) $amount = 1;
 
         try {
             $hooker = HookerModel::findOrFail($hookerId);
-            $game->action()->buy($hooker, $amount);
+            $totalCost = $game->action()->buy($hooker, $amount);
+            $formattedTotal = number_format($totalCost);
+            $this->buyAmounts[$hookerId] = '';
             $this->dispatch('user-stats-updated');
-            $this->dispatch('toast', type: 'success', message: 'Prostitutas compradas com sucesso!');
+            $this->dispatch('toast', type: 'success', message: "{$amount}x {$hooker->name} comprada(s) por \${$formattedTotal} com sucesso!");
         } catch (\Throwable $th) {
             $this->dispatch('toast', type: 'error', message: $th->getMessage());
         }
@@ -28,13 +32,16 @@ class Hooker extends Component
 
     public function sellHooker($hookerId, GameFacade $game)
     {
-        $amount = $this->amounts[$hookerId] ?? 1;
+        $amount = (int) ($this->sellAmounts[$hookerId] ?? 1);
+        if ($amount <= 0) $amount = 1;
 
         try {
             $hooker = HookerModel::findOrFail($hookerId);
-            $game->action()->sell($hooker, $amount);
+            $totalProfit = $game->action()->sell($hooker, $amount);
+            $formattedTotal = number_format($totalProfit);
+            $this->sellAmounts[$hookerId] = '';
             $this->dispatch('user-stats-updated');
-            $this->dispatch('toast', type: 'success', message: 'Prostitutas vendidas com sucesso!');
+            $this->dispatch('toast', type: 'success', message: "{$amount}x {$hooker->name} vendida(s) por \${$formattedTotal} com sucesso!");
         } catch (\Throwable $th) {
             $this->dispatch('toast', type: 'error', message: $th->getMessage());
         }
@@ -43,9 +50,10 @@ class Hooker extends Component
     public function collectIncome(GameFacade $game)
     {
         try {
-            $game->action()->collectHookerIncome();
+            $income = $game->action()->collectHookerIncome();
+            $formattedIncome = number_format($income);
             $this->dispatch('user-stats-updated');
-            $this->dispatch('toast', type: 'success', message: 'Renda das prostitutas coletada com sucesso!');
+            $this->dispatch('toast', type: 'success', message: "Renda de \${$formattedIncome} coletada com sucesso!");
         } catch (\Throwable $th) {
             $this->dispatch('toast', type: 'error', message: $th->getMessage());
         }
@@ -53,9 +61,13 @@ class Hooker extends Component
 
     public function render(GameFacade $game)
     {
+        $user = $game->user;
+        $user->refresh();
+
         return view('livewire.game.hooker', [
-            'hookers' => HookerModel::orderBy('name')->get(),
-            'owned' => $game->user->hookers,
+            'user' => $user,
+            'hookers' => HookerModel::orderBy('price', 'asc')->get(),
+            'owned' => $user->hookers()->orderBy('price', 'asc')->get(),
         ]);
     }
 }

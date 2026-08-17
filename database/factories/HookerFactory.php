@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 class HookerFactory extends Factory
 {
     protected $model = Hooker::class;
+
     /**
      * Define the model's default state.
      *
@@ -18,11 +19,15 @@ class HookerFactory extends Factory
      */
     public function definition(): array
     {
+        $price = $this->faker->numberBetween(500, 100000);
+        // Daily income is proportional to price (e.g., 15% daily return)
+        $income = (int) round($price * 0.15);
+
         return [
-            'name' => fake()->name(),
-            'income' => fake()->numberBetween(10, 10000),
-            'price' => fake()->numberBetween(50, 100000),
-            'avatar' => fake()->url(),
+            'name' => $this->faker->name(),
+            'price' => $price,
+            'income' => $income,
+            'avatar' => $this->faker->url(),
         ];
     }
 }

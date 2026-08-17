@@ -38,9 +38,11 @@ class Inventory extends Component
     {
         try {
             $userEquipment = UserEquipment::where('user_id', $game->user->id)->findOrFail($userEquipmentId);
-            $game->action()->sell($userEquipment);
+            $equipmentName = $userEquipment->equipment->name;
+            $totalProfit = $game->action()->sell($userEquipment);
+            $formattedTotal = number_format($totalProfit);
             $this->dispatch('user-stats-updated');
-            $this->dispatch('toast', type: 'success', message: 'Equipamento vendido com sucesso!');
+            $this->dispatch('toast', type: 'success', message: "Equipamento {$equipmentName} vendido por \${$formattedTotal} com sucesso!");
         } catch (\Throwable $th) {
             $this->dispatch('toast', type: 'error', message: $th->getMessage());
         }

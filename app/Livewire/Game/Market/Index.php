@@ -14,9 +14,10 @@ class Index extends Component
     {
         try {
             $equipment = Equipment::findOrFail($equipmentId);
-            $game->action()->buy($equipment);
+            $totalCost = $game->action()->buy($equipment);
+            $formattedTotal = number_format($totalCost);
             $this->dispatch('user-stats-updated');
-            $this->dispatch('toast', type: 'success', message: 'Equipamento comprado com sucesso!');
+            $this->dispatch('toast', type: 'success', message: "Equipamento {$equipment->name} comprado por \${$formattedTotal} com sucesso!");
         } catch (\Throwable $th) {
             $this->dispatch('toast', type: 'error', message: $th->getMessage());
         }
