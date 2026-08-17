@@ -249,7 +249,7 @@ class ActionService
     }
 
     // ==================== HOOKER ======================
-    public function collectHookerIncome(): int
+    public function collectHookerIncome(): array
     {
         $income = $this->user->hooker_income;
 
@@ -257,13 +257,33 @@ class ActionService
             throw new \RuntimeException("Nothing to collect.");
         }
 
-        DB::transaction(function () use ($income) {
+        $escapedHooker = null;
+        $escapedCount = 0;
+
+        DB::transaction(function () use ($income, &$escapedHooker, &$escapedCount) {
             $this->user->adjustCash($income);
             $this->user->increment('hooker_profits', $income);
             DB::table('user_hookers')->where('user_id', $this->user->id)->update(['available_income' => 0]);
+
+            // Random escape event: 25% chance
+            if (rand(1, 100) <= 25) {
+                // Get one random hooker type that the user currently owns
+                $owned = $this->user->hookers()->wherePivot('amount', '>', 0)->inRandomOrder()->first();
+                if ($owned) {
+                    $amountOwned = $owned->pivot->amount;
+                    $escapedCount = (int) max(1, (int) ($amountOwned * 0.05));
+                    $owned->removeFromUser($this->user, $escapedCount);
+                    $escapedHooker = $owned;
+                }
+            }
         });
 
-        return $income;
+        return [
+            'income' => $income,
+            'escaped' => $escapedHooker !== null,
+            'hooker_name' => $escapedHooker ? $escapedHooker->name : null,
+            'escaped_count' => $escapedCount,
+        ];
     }
 
     // ==================== JAIL ======================

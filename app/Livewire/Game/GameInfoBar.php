@@ -21,7 +21,7 @@ class GameInfoBar extends Component
         if ($this->lastKnownDay > 0 && $currentDay !== $this->lastKnownDay) {
             $this->lastKnownDay = $currentDay;
             $this->dispatch('user-stats-updated');
-            $this->dispatch('toast', type: 'info', message: "🗓️ O Dia {$currentDay} começou! Rendimentos, juros e produções foram atualizados.");
+            $this->dispatch('toast', type: 'info', message: "🗓️ O Dia {$currentDay} começou! Rendimentos e produções foram atualizados.");
         } else {
             $this->lastKnownDay = $currentDay;
         }

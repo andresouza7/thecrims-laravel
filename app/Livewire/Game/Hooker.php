@@ -50,10 +50,16 @@ class Hooker extends Component
     public function collectIncome(GameFacade $game)
     {
         try {
-            $income = $game->action()->collectHookerIncome();
-            $formattedIncome = number_format($income);
+            $result = $game->action()->collectHookerIncome();
+            $formattedIncome = number_format($result['income']);
             $this->dispatch('user-stats-updated');
+            
             $this->dispatch('toast', type: 'success', message: "Renda de \${$formattedIncome} coletada com sucesso!");
+            
+            if ($result['escaped']) {
+                $verb = $result['escaped_count'] > 1 ? 'fugiram' : 'fugiu';
+                $this->dispatch('toast', type: 'warning', message: "Atenção: {$result['escaped_count']} de suas '{$result['hooker_name']}' {$verb} durante sua ausência!");
+            }
         } catch (\Throwable $th) {
             $this->dispatch('toast', type: 'error', message: $th->getMessage());
         }
