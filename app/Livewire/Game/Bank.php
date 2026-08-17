@@ -28,10 +28,6 @@ class Bank extends Component
                     $val = $user->cash;
                 }
 
-                if ($val <= 0) {
-                    throw new \RuntimeException("Você não possui dinheiro em mãos para depositar!");
-                }
-
                 $game->action()->deposit($val);
                 $this->amount = 0;
                 $this->dispatch('user-stats-updated');
@@ -39,10 +35,6 @@ class Bank extends Component
             } else {
                 if ($val <= 0) {
                     $val = $user->bank;
-                }
-
-                if ($val <= 0) {
-                    throw new \RuntimeException("Você não possui dinheiro no banco para sacar!");
                 }
 
                 $game->action()->withdraw($val);

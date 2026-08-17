@@ -61,7 +61,7 @@ class Hooker extends Model implements Buyable, Sellable, Stackable
     public function validateInventory(User $user, int $quantity = 1): void
     {
         if ($this->getAmountForUser($user) < $quantity) {
-            throw new \RuntimeException("Not enough of {$this->name} to sell.");
+            throw new \RuntimeException("Você não possui quantidade suficiente de {$this->name} para vender.");
         }
     }
 }

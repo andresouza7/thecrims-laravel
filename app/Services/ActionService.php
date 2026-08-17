@@ -20,7 +20,7 @@ class ActionService
     public function deposit(int $amount): int
     {
         if ($amount <= 0 || $this->user->cash < $amount) {
-            throw new \RuntimeException('Not enough funds to make deposit');
+            throw new \RuntimeException('Você não possui dinheiro para depositar!');
         }
 
         DB::transaction(function () use ($amount) {
@@ -34,7 +34,7 @@ class ActionService
     public function withdraw(int $amount): int
     {
         if ($amount <= 0 || $this->user->bank < $amount) {
-            throw new \RuntimeException('Not enough funds to withdraw');
+            throw new \RuntimeException('Você não possui saldo no banco para sacar!');
         }
 
         DB::transaction(function () use ($amount) {

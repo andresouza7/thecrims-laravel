@@ -18,7 +18,8 @@ class Component extends Model implements Sellable, Stackable
         return (int) $this->price;
     }
 
-    public function drug() {
+    public function drug()
+    {
         return $this->belongsTo(Drug::class);
     }
 
@@ -61,7 +62,7 @@ class Component extends Model implements Sellable, Stackable
     public function validateInventory(User $user, int $quantity = 1): void
     {
         if ($this->getAmountForUser($user) < $quantity) {
-            throw new \RuntimeException("Not enough of {$this->name} to sell.");
+            throw new \RuntimeException("Você não possui quantidade suficiente de {$this->name} em estoque.");
         }
     }
 }

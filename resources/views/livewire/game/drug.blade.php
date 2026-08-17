@@ -50,7 +50,7 @@
                             <div class="flex items-center gap-2 justify-between md:justify-end py-0.5">
                                 <input type="number" min="1" max="{{ $drug->user_amount }}" wire:model="amounts.{{ $drug->id }}" placeholder="Qtd"
                                        class="w-20 p-1 bg-gray-950 border border-gray-800 rounded text-xs text-gray-100 font-mono focus:outline-none focus:border-sky-500 text-center">
-                                <button wire:click="sell({{ $drug->id }})" wire:loading.attr="disabled"
+                                <button wire:click="sell({{ $drug->id }})" wire:loading.attr="disabled" wire:target="sell({{ $drug->id }})"
                                         class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-xs font-bold rounded transition whitespace-nowrap shadow-md">
                                     Vender
                                 </button>
