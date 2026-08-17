@@ -1,4 +1,4 @@
-<div class="space-y-6 max-w-4xl mx-auto">
+<div class="space-y-6">
     <div class="flex justify-between items-center border-b border-gray-800 pb-3">
         <div>
             <h2 class="text-2xl font-bold text-white">🏦 Banco da Cidade</h2>

@@ -10,7 +10,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CheckUserStatus
 {
-    protected array $allowedPaths = ['/', 'admin*', 'bank*'];
 
     public function handle(Request $request, Closure $next): Response
     {
@@ -21,14 +20,14 @@ class CheckUserStatus
         $user = Auth::user() ?? User::first();
         if (! $user) return $next($request);
 
-        foreach ($this->allowedPaths as $allowed) {
-            if ($request->is($allowed)) {
-                return $next($request);
+        if (!$user->canAccessPath($request->path())) {
+            if ($user->in_jail) {
+                return to_route('jail.index');
+            }
+            if ($user->in_hospital) {
+                return to_route('hospital.index');
             }
         }
-
-        if ($user->in_jail && !$request->is('jail*')) return to_route('jail.index');
-        if ($user->in_hospital && !$request->is('hospital*')) return to_route('hospital.index');
 
         return $next($request);
     }

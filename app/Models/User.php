@@ -184,7 +184,7 @@ class User extends Authenticatable
     {
         return $this->weapon ? $this->weapon->base_damage : 0;
     }
-   
+
     public function getInJailAttribute(): bool
     {
         return $this->jail_end_time ? Carbon::now()->lt($this->jail_end_time) : false;
@@ -203,6 +203,25 @@ class User extends Authenticatable
     public function getHospitalReleaseCostAttribute(): int
     {
         return $this->respect * 1000;
+    }
+
+    public function canAccessPath(string $path): bool
+    {
+        $path = trim($path, '/');
+
+        if (\Illuminate\Support\Str::is(['admin*', 'livewire*'], $path)) {
+            return true;
+        }
+
+        if ($this->in_jail) {
+            return \Illuminate\Support\Str::is(['jail*', 'bank*', 'career*', 'dashboard*', 'info*'], $path) || $path === '';
+        }
+
+        if ($this->in_hospital) {
+            return \Illuminate\Support\Str::is(['hospital*', 'bank*', 'career*', 'dashboard*', 'info*'], $path) || $path === '';
+        }
+
+        return true;
     }
 
     // Robbery skill

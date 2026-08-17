@@ -4,12 +4,6 @@
         <div class="text-xs text-gray-400">Recupere stamina e enfrente adversários</div>
     </div>
 
-    @if ($combatMessage)
-        <div class="p-4 rounded-lg border font-medium text-sm flex items-center justify-between {{ $combatStatus === 'success' ? 'bg-emerald-900/60 border-emerald-600 text-emerald-200' : 'bg-rose-900/60 border-rose-600 text-rose-200' }}">
-            <span>{{ $combatMessage }}</span>
-            <button wire:click="$set('combatMessage', null)" class="text-xs font-bold hover:underline">Fechar ✖</button>
-        </div>
-    @endif
 
     <div class="space-y-4">
         <h3 class="text-lg font-bold text-gray-200">Adversário Encontrado na Pista</h3>

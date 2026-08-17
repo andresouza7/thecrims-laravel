@@ -33,19 +33,6 @@ class Drug extends Component
         }
     }
 
-    public function rewardItem(GameFacade $game)
-    {
-        try {
-            $drug = DrugModel::first();
-            if ($drug) {
-                $drug->addToUser($game->user, 10);
-                $this->dispatch('user-stats-updated');
-                $this->dispatch('toast', type: 'success', message: "Recompensa de 10x {$drug->name} adicionada com sucesso!");
-            }
-        } catch (\Throwable $th) {
-            $this->dispatch('toast', type: 'error', message: $th->getMessage());
-        }
-    }
 
     public function render(GameFacade $game)
     {

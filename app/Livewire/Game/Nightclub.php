@@ -8,8 +8,7 @@ use Livewire\Component;
 
 class Nightclub extends Component
 {
-    public ?string $combatMessage = null;
-    public ?string $combatStatus = null;
+    protected $listeners = ['user-stats-updated' => '$refresh'];
 
     public function fight($userId, GameFacade $game)
     {
@@ -20,15 +19,15 @@ class Nightclub extends Component
             $this->dispatch('user-stats-updated');
 
             if ($result['loser'] === $user->id) {
-                $this->combatStatus = 'success';
-                $this->combatMessage = 'Você venceu a luta contra ' . $user->name . '!';
+                $reward = number_format($result['rewardCash']);
+                $this->dispatch('toast', type: 'success', message: "Você venceu a luta contra {$user->name}! Roubou \${$reward} e ganhou atributos.");
             } else {
-                $this->combatStatus = 'error';
-                $this->combatMessage = 'Você perdeu a luta para ' . $user->name . '!';
+                $this->dispatch('toast', type: 'error', message: "Você perdeu a luta para {$user->name} e foi enviado ao hospital!");
+                // Redirect user to hospital index since they are hospitalized now
+                return $this->redirect(route('hospital.index'), navigate: true);
             }
         } catch (\Throwable $th) {
-            $this->combatStatus = 'error';
-            $this->combatMessage = $th->getMessage();
+            $this->dispatch('toast', type: 'error', message: $th->getMessage());
         }
     }
 

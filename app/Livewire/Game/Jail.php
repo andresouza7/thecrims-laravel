@@ -7,6 +7,7 @@ use Livewire\Component;
 
 class Jail extends Component
 {
+    protected $listeners = ['user-stats-updated' => '$refresh'];
     public function bribe(GameFacade $game)
     {
         try {

@@ -7,6 +7,8 @@ use Livewire\Component;
 
 class Hospital extends Component
 {
+    protected $listeners = ['user-stats-updated' => '$refresh'];
+
     public function release(GameFacade $game)
     {
         try {
@@ -18,8 +20,13 @@ class Hospital extends Component
         }
     }
 
-    public function render()
+    public function render(GameFacade $game)
     {
-        return view('livewire.game.hospital');
+        $user = $game->user;
+        $user->refresh();
+
+        return view('livewire.game.hospital', [
+            'user' => $user,
+        ]);
     }
 }

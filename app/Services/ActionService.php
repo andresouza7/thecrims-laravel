@@ -303,4 +303,73 @@ class ActionService
         $this->user->hospital_end_time = null;
         $this->user->save();
     }
+
+    public function fight(User $victim): array
+    {
+        $attacker = $this->user;
+
+        if ($attacker->health < 10) {
+            throw new \RuntimeException("Muito fraco para lutar. Vá ao hospital!");
+        }
+
+        // Check stamina
+        $staminaCost = 20;
+        if ($attacker->stamina < $staminaCost) {
+            throw new \RuntimeException("Sem stamina suficiente para atacar!");
+        }
+
+        return DB::transaction(function () use ($attacker, $victim, $staminaCost) {
+            // Reduce attacker stamina
+            $attacker->stamina -= $staminaCost;
+
+            // Compare assault powers
+            $attackerPower = $attacker->assault_power;
+            $victimPower   = $victim->assault_power;
+
+            // Randomize slightly to avoid deterministic outcome
+            $attackerRoll = $attackerPower + rand(0, 10);
+            $victimRoll   = $victimPower + rand(0, 10);
+
+            $winner = $attackerRoll >= $victimRoll ? $attacker : $victim;
+            $loser  = $winner->is($attacker) ? $victim : $attacker;
+
+            // Apply health loss
+            $winner->health = max(1, $winner->health - rand(5, 15)); // Winner loses some health
+            $loser->health  = 0; // Loser is killed
+            $loser->hospital_end_time = Carbon::now()->addMinutes(15);
+
+            $rewardCash = 0;
+            // If attacker wins, reward them
+            if ($winner->is($attacker)) {
+                $rewardCash = (int) ($victim->cash * 0.1); // Take 10% of victim's cash
+                $attacker->adjustCash($rewardCash);
+                $victim->adjustCash(-$rewardCash);
+
+                // Reward stats
+                $statReward = 2; // Example: 2 points each
+                $attacker->strength     += $statReward;
+                $attacker->intelligence += $statReward;
+                $attacker->charisma     += $statReward;
+                $attacker->tolerance    += $statReward;
+
+                // Register kill
+                DB::table('user_kills')->insert([
+                    'killer_id' => $attacker->id,
+                    'victim_id' => $victim->id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+
+            // Persist changes
+            $attacker->save();
+            $victim->save();
+
+            return [
+                'winner' => $winner->id,
+                'loser' => $loser->id,
+                'rewardCash' => $rewardCash,
+            ];
+        });
+    }
 }

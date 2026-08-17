@@ -24,6 +24,7 @@ class DebugPanel extends Component
     public $charisma;
     public $intelligence;
     public $stamina;
+    public $health;
 
     // Drug management
     public $selectedDrugId;
@@ -57,6 +58,7 @@ class DebugPanel extends Component
         $this->charisma = $user->charisma;
         $this->intelligence = $user->intelligence;
         $this->stamina = $user->stamina;
+        $this->health = $user->health;
 
         if ($this->selectedDrugId) {
             $userDrug = DB::table('user_drugs')->where('user_id', $user->id)->where('drug_id', $this->selectedDrugId)->first();
@@ -99,6 +101,7 @@ class DebugPanel extends Component
         $user->charisma = (int) $this->charisma;
         $user->intelligence = (int) $this->intelligence;
         $user->stamina = min(100, max(0, (int) $this->stamina));
+        $user->health = min($user->max_health, max(0, (int) $this->health));
         $user->save();
 
         $this->dispatch('user-stats-updated');
@@ -273,11 +276,37 @@ class DebugPanel extends Component
         $this->dispatch('toast', type: 'info', message: "Requisitos do Nível " . ($currentLevelNum + 1) . " preenchidos!");
     }
 
+    public function toggleJailStatus(GameFacade $game)
+    {
+        $user = $game->user;
+        if ($user->in_jail) {
+            $game->action()->releaseFromJail();
+            $this->dispatch('toast', type: 'info', message: 'Jogador liberado da cadeia!');
+        } else {
+            $game->action()->sendToJail(15);
+            $this->dispatch('toast', type: 'info', message: 'Jogador enviado para a cadeia por 15 minutos!');
+        }
+        $this->dispatch('user-stats-updated');
+    }
+
+    public function toggleHospitalStatus(GameFacade $game)
+    {
+        $user = $game->user;
+        if ($user->in_hospital) {
+            $game->action()->releaseFromHospital();
+            $this->dispatch('toast', type: 'info', message: 'Jogador liberado do hospital!');
+        } else {
+            $game->action()->sendToHospital(15);
+            $this->dispatch('toast', type: 'info', message: 'Jogador enviado para o hospital por 15 minutos!');
+        }
+        $this->dispatch('user-stats-updated');
+    }
+
     public function resetCareerLevel(GameFacade $game)
     {
         $user = $game->user;
         if ($user->career_id) {
-            $level1 = CareerLevel::where('career_id', $user->career_id)->where('level', 1)->first();
+            $level1 = \App\Models\CareerLevel::where('career_id', $user->career_id)->where('level', 1)->first();
             $user->career_level_id = $level1?->id;
             $user->save();
             $this->dispatch('user-stats-updated');

@@ -55,6 +55,10 @@
                         <input type="number" wire:model="bank" class="w-full p-1.5 bg-gray-950 border border-gray-800 rounded text-gray-100 text-xs">
                     </div>
                     <div>
+                        <label class="block text-gray-400 mb-0.5">Vida (Health)</label>
+                        <input type="number" wire:model="health" class="w-full p-1.5 bg-gray-950 border border-gray-800 rounded text-gray-100 text-xs">
+                    </div>
+                    <div>
                         <label class="block text-gray-400 mb-0.5">Stamina (0-100)</label>
                         <input type="number" wire:model="stamina" class="w-full p-1.5 bg-gray-950 border border-gray-800 rounded text-gray-100 text-xs">
                     </div>
@@ -70,7 +74,7 @@
                         <label class="block text-gray-400 mb-0.5">Carisma</label>
                         <input type="number" wire:model="charisma" class="w-full p-1.5 bg-gray-950 border border-gray-800 rounded text-gray-100 text-xs">
                     </div>
-                    <div class="col-span-2">
+                    <div>
                         <label class="block text-gray-400 mb-0.5">Inteligência</label>
                         <input type="number" wire:model="intelligence" class="w-full p-1.5 bg-gray-950 border border-gray-800 rounded text-gray-100 text-xs">
                     </div>
@@ -78,6 +82,22 @@
                 <button wire:click="updateStats" type="button" class="w-full py-1.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded transition mt-1 text-xs">
                     Salvar Status do Jogador
                 </button>
+
+                <div class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-gray-800/40">
+                    @php
+                        $user = auth()->user() ?? \App\Models\User::first();
+                        $inJail = $user?->in_jail ?? false;
+                        $inHospital = $user?->in_hospital ?? false;
+                    @endphp
+                    <button wire:click="toggleJailStatus" type="button"
+                            class="py-1 px-2 font-semibold rounded text-[10px] transition {{ $inJail ? 'bg-emerald-600 hover:bg-emerald-500 text-white' : 'bg-rose-600 hover:bg-rose-500 text-white' }}">
+                        {{ $inJail ? '🔓 Liberar da Cadeia' : '🔒 Mandar p/ Cadeia' }}
+                    </button>
+                    <button wire:click="toggleHospitalStatus" type="button"
+                            class="py-1 px-2 font-semibold rounded text-[10px] transition {{ $inHospital ? 'bg-emerald-600 hover:bg-emerald-500 text-white' : 'bg-rose-600 hover:bg-rose-500 text-white' }}">
+                        {{ $inHospital ? '🩺 Dar Alta Médica' : '🏥 Mandar p/ Hospital' }}
+                    </button>
+                </div>
             </div>
 
             <!-- Drug Manipulator -->
@@ -139,11 +159,11 @@
                 <h4 class="font-bold text-blue-400 uppercase tracking-wider text-[9px]">🛡️ Equipamentos</h4>
                 <div class="text-[11px]">
                     <label class="block text-gray-400 mb-0.5">Selecione o Equipamento</label>
-                    <select wire:model="selectedEquipmentId" class="w-full p-1.5 bg-gray-950 border border-gray-800 rounded text-gray-100 text-xs">
+                    <select wire:model.live="selectedEquipmentId" class="w-full p-1.5 bg-gray-950 border border-gray-800 rounded text-gray-100 text-xs">
                         <option value="">Selecione...</option>
                         @foreach ($equipment as $eq)
                             <option value="{{ $eq->id }}">
-                                {{ $eq->name }} ({{ in_array($eq->id, $userEquipmentIds) ? 'POSSUI' : 'NÃO POSSUI' }})
+                                [{{ strtoupper($eq->type) }}] {{ $eq->name }} ({{ in_array($eq->id, $userEquipmentIds) ? 'POSSUI' : 'NÃO POSSUI' }})
                             </option>
                         @endforeach
                     </select>
