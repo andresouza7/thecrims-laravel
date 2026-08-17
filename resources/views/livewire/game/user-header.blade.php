@@ -1,4 +1,4 @@
-<div class="p-4 bg-gray-900 border border-gray-800 rounded-lg shadow text-gray-100">
+<div wire:poll.5s class="p-4 bg-gray-900 border border-gray-800 rounded-lg shadow text-gray-100">
     <h4 class="font-semibold text-gray-300 mb-3 border-b border-gray-800 pb-1">Status do Jogador</h4>
 
     @if ($user)

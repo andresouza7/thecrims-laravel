@@ -10,21 +10,23 @@ class Drug extends Component
 {
     protected $listeners = ['user-stats-updated' => '$refresh'];
 
-    public $selectedDrugId;
-    public $amount = 1;
+    public array $amounts = [];
 
-    public function sell(GameFacade $game)
+    public function sell($drugId, GameFacade $game)
     {
-        if ($this->amount <= 0) {
-            $this->dispatch('toast', type: 'error', message: 'Informe uma quantidade válida!');
+        $amount = (int) ($this->amounts[$drugId] ?? 0);
+
+        if ($amount <= 0) {
+            $this->dispatch('toast', type: 'error', message: 'Informe uma quantidade válida para vender!');
             return;
         }
 
         try {
-            $drug = DrugModel::findOrFail($this->selectedDrugId);
-            $game->action()->sell($drug, $this->amount);
+            $drug = DrugModel::findOrFail($drugId);
+            $game->action()->sell($drug, $amount);
+            $this->amounts[$drugId] = '';
             $this->dispatch('user-stats-updated');
-            $this->dispatch('toast', type: 'success', message: 'Drogas vendidas com sucesso!');
+            $this->dispatch('toast', type: 'success', message: "Venda de {$amount}x {$drug->name} efetuada com sucesso!");
         } catch (\Throwable $th) {
             $this->dispatch('toast', type: 'error', message: $th->getMessage());
         }
@@ -33,10 +35,12 @@ class Drug extends Component
     public function rewardItem(GameFacade $game)
     {
         try {
-            $drug = DrugModel::findOrFail($this->selectedDrugId);
-            $game->action()->rewardItem($drug, $this->amount);
-            $this->dispatch('user-stats-updated');
-            $this->dispatch('toast', type: 'success', message: 'Drogas de recompensa adicionadas!');
+            $drug = DrugModel::first();
+            if ($drug) {
+                $drug->addToUser($game->user, 10);
+                $this->dispatch('user-stats-updated');
+                $this->dispatch('toast', type: 'success', message: "Recompensa de 10x {$drug->name} adicionada com sucesso!");
+            }
         } catch (\Throwable $th) {
             $this->dispatch('toast', type: 'error', message: $th->getMessage());
         }
@@ -44,10 +48,18 @@ class Drug extends Component
 
     public function render(GameFacade $game)
     {
-        $drugs = DrugModel::orderBy('name')->get();
+        $user = $game->user;
+        $user->refresh();
+
+        $userDrugsMap = $user->drugs->keyBy('id');
+        $allDrugs = DrugModel::orderBy('name')->get()->map(function ($drug) use ($userDrugsMap) {
+            $userDrug = $userDrugsMap->get($drug->id);
+            $drug->user_amount = $userDrug ? (int) $userDrug->pivot->amount : 0;
+            return $drug;
+        });
 
         return view('livewire.game.drug', [
-            'drugs' => $drugs,
+            'drugs' => $allDrugs,
         ]);
     }
 }
