@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Interfaces\Buyable;
 use App\Interfaces\Sellable;
 use App\Interfaces\Stackable;
-use App\Interfaces\StackableItem;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -28,7 +27,7 @@ class Drug extends Model implements Buyable, Sellable, Stackable
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'user_drugs')
-            ->withPivot(['amount'])
+            ->withPivot(['amount', 'total_sold'])
             ->withTimestamps();
     }
 
@@ -50,10 +49,13 @@ class Drug extends Model implements Buyable, Sellable, Stackable
         $row = $this->users()->where('user_id', $user->id)->first();
         if (!$row) return;
 
-        $newAmount = $row->pivot->amount - $quantity;
-        $newAmount > 0
-            ? $this->users()->updateExistingPivot($user->id, ['amount' => $newAmount])
-            : $this->users()->detach($user->id);
+        $newAmount = max(0, $row->pivot->amount - $quantity);
+        $newTotalSold = ($row->pivot->total_sold ?? 0) + $quantity;
+
+        $this->users()->updateExistingPivot($user->id, [
+            'amount' => $newAmount,
+            'total_sold' => $newTotalSold,
+        ]);
     }
 
     public function validateInventory(User $user, int $quantity = 1): void

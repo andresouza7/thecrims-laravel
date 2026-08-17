@@ -8,11 +8,13 @@ use Livewire\Component;
 
 class Inventory extends Component
 {
+    protected $listeners = ['user-stats-updated' => '$refresh'];
+
     public function activate($userEquipmentId, GameFacade $game)
     {
         try {
-            $equipment = UserEquipment::findOrFail($userEquipmentId);
-            $game->action()->activateEquipment($equipment);
+            $userEquipment = UserEquipment::where('user_id', $game->user->id)->findOrFail($userEquipmentId);
+            $game->action()->activateEquipment($userEquipment);
             $this->dispatch('user-stats-updated');
             session()->flash('message', 'Equipamento equipado com sucesso!');
         } catch (\Throwable $th) {
@@ -23,8 +25,8 @@ class Inventory extends Component
     public function deactivate($userEquipmentId, GameFacade $game)
     {
         try {
-            $equipment = UserEquipment::findOrFail($userEquipmentId);
-            $game->action()->deactivateEquipment($equipment);
+            $userEquipment = UserEquipment::where('user_id', $game->user->id)->findOrFail($userEquipmentId);
+            $game->action()->deactivateEquipment($userEquipment);
             $this->dispatch('user-stats-updated');
             session()->flash('message', 'Equipamento desequipado com sucesso!');
         } catch (\Throwable $th) {
@@ -35,8 +37,8 @@ class Inventory extends Component
     public function sell($userEquipmentId, GameFacade $game)
     {
         try {
-            $equipment = UserEquipment::findOrFail($userEquipmentId);
-            $game->action()->sell($equipment);
+            $userEquipment = UserEquipment::where('user_id', $game->user->id)->findOrFail($userEquipmentId);
+            $game->action()->sell($userEquipment);
             $this->dispatch('user-stats-updated');
             session()->flash('message', 'Equipamento vendido com sucesso!');
         } catch (\Throwable $th) {
@@ -46,12 +48,17 @@ class Inventory extends Component
 
     public function render(GameFacade $game)
     {
-        $armors = $game->user->equipment()->where('type', 'armor')->get();
-        $weapons = $game->user->equipment()->whereNot('type', 'armor')->get();
+        $user = $game->user;
+        $user->unsetRelation('equipment');
+        $user->refresh();
+
+        $armors = $user->equipment()->where('type', 'armor')->get();
+        $weapons = $user->equipment()->whereNot('type', 'armor')->get();
 
         return view('livewire.game.inventory', [
             'armors' => $armors,
             'weapons' => $weapons,
+            'user' => $user,
         ]);
     }
 }

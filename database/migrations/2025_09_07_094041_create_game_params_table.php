@@ -13,11 +13,9 @@ return new class extends Migration
     {
         Schema::create('game_params', function (Blueprint $table) {
             $table->id();
-            $table->text('name');
-            $table->text('type');
-            $table->unsignedBigInteger('related_id')->nullable();
-            $table->string('related_type')->nullable();
-            // $table->morphs('related'); // cria related_id e related_type
+            $table->string('name');
+            $table->enum('type', ['requirement', 'reward']);
+            $table->nullableMorphs('target');
             $table->timestamps();
         });
     }

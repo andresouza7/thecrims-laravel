@@ -26,6 +26,7 @@ class User extends Authenticatable
         'email',
         'password',
         'career_id',
+        'career_level_id',
     ];
 
     /**
@@ -70,6 +71,11 @@ class User extends Authenticatable
         return $this->belongsTo(Career::class);
     }
 
+    public function careerLevel()
+    {
+        return $this->belongsTo(CareerLevel::class, 'career_level_id');
+    }
+
     public function components()
     {
         return $this->belongsToMany(Component::class, 'user_components')
@@ -80,7 +86,7 @@ class User extends Authenticatable
     public function drugs()
     {
         return $this->belongsToMany(Drug::class, 'user_drugs')
-            ->withPivot(['amount'])
+            ->withPivot(['amount', 'total_sold'])
             ->withTimestamps();
     }
 

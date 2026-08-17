@@ -7,6 +7,8 @@ use Livewire\Component;
 
 class Bank extends Component
 {
+    protected $listeners = ['user-stats-updated' => '$refresh'];
+
     public $amount = '';
 
     public function deposit(GameFacade $game)

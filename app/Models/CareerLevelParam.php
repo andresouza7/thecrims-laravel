@@ -25,9 +25,8 @@ class CareerLevelParam extends Model
         return $this->belongsTo(GameParam::class);
     }
 
-    // Acesso ao modelo polimórfico do param
-    public function related()
+    public function target()
     {
-        return $this->gameParam->related(); // chama o morphTo do GameParam
+        return $this->game_param?->target();
     }
 }

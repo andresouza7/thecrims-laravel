@@ -8,6 +8,8 @@ use Livewire\Component;
 
 class Drug extends Component
 {
+    protected $listeners = ['user-stats-updated' => '$refresh'];
+
     public array $amounts = [];
 
     public function sell($drugId, GameFacade $game)

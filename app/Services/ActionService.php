@@ -63,30 +63,56 @@ class ActionService
             $this->user->adjustCash($profit);
             $item->removeFromUser($this->user, $quantity);
 
-            $this->user->increment('drug_profits', $profit);
+            if ($item instanceof \App\Models\Drug) {
+                $this->user->increment('drug_profits', $profit);
+            }
         });
     }
 
     public function activateEquipment(UserEquipment $userEquipment): void
     {
-        if ($userEquipment->equipment->type === 'armor') {
-            $this->user->armor_id = $userEquipment->equipment_id;
-        } else {
-            $this->user->weapon_id = $userEquipment->equipment_id;
-        }
+        DB::transaction(function () use ($userEquipment) {
+            $user = $this->user;
+            $type = $userEquipment->equipment->type;
 
-        $this->user->save();
+            // Deactivate all user equipment of same type
+            $userEqIds = DB::table('user_equipment')
+                ->join('equipment', 'equipment.id', '=', 'user_equipment.equipment_id')
+                ->where('user_equipment.user_id', $user->id)
+                ->where('equipment.type', $type)
+                ->pluck('user_equipment.id');
+
+            DB::table('user_equipment')->whereIn('id', $userEqIds)->update(['active' => false]);
+
+            // Set target equipment as active
+            $userEquipment->active = true;
+            $userEquipment->save();
+
+            if ($type === 'armor') {
+                $user->armor_id = $userEquipment->equipment_id;
+            } else {
+                $user->weapon_id = $userEquipment->equipment_id;
+            }
+            $user->save();
+        });
     }
 
     public function deactivateEquipment(UserEquipment $userEquipment): void
     {
-        if ($userEquipment->equipment->type === 'armor') {
-            $this->user->armor_id = null;
-        } else {
-            $this->user->weapon_id = null;
-        }
+        DB::transaction(function () use ($userEquipment) {
+            $user = $this->user;
+            $type = $userEquipment->equipment->type;
 
-        $this->user->save();
+            $userEquipment->active = false;
+            $userEquipment->save();
+
+            if ($type === 'armor' && $user->armor_id === $userEquipment->equipment_id) {
+                $user->armor_id = null;
+            } elseif ($type !== 'armor' && $user->weapon_id === $userEquipment->equipment_id) {
+                $user->weapon_id = null;
+            }
+            $user->save();
+        });
     }
 
     public function fight(User $victim)

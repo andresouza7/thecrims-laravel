@@ -27,31 +27,21 @@ class CareerLevel extends Model
 
     public function getRequirements()
     {
-        return CareerLevelParam::where('career_level_id', $this->id)
+        return CareerLevelParam::with(['game_param.target'])
+            ->where('career_level_id', $this->id)
             ->whereHas('game_param', function ($query) {
                 $query->where('type', 'requirement');
             })
-            ->get()
-            ->map(fn($clp) => [
-                'id' => $clp->game_param->id,
-                'name' => $clp->game_param->name,
-                'value' => $clp->value,
-            ]);
+            ->get();
     }
 
     public function getRewards()
     {
-        return CareerLevelParam::with(['game_param.related'])
+        return CareerLevelParam::with(['game_param.target'])
             ->where('career_level_id', $this->id)
             ->whereHas('game_param', function ($query) {
                 $query->where('type', 'reward');
             })
-            ->get()
-            ->map(fn($clp) => [
-                'id' => $clp->game_param->id,
-                'name' => $clp->game_param->name,
-                'value' => $clp->value,
-                'related' => $clp->game_param->related, // polymorphic model or null
-            ]);
+            ->get();
     }
 }

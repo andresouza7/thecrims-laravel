@@ -43,6 +43,9 @@
         </main>
     </div>
 
+    <!-- Temporary Debug Panel Sidebar -->
+    <livewire:game.debug-panel />
+
     @livewireScripts
 </body>
 </html>

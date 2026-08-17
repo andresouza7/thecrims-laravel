@@ -7,8 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class UserEquipment extends Model implements Sellable
 {
-     protected $fillable = [
-        'user_id', 'equipment_id'
+    protected $table = 'user_equipment';
+
+    protected $fillable = [
+        'user_id', 'equipment_id', 'active'
+    ];
+
+    protected $casts = [
+        'active' => 'boolean',
     ];
 
     public function user()
@@ -23,23 +29,31 @@ class UserEquipment extends Model implements Sellable
 
     public function getPrice(): int
     {
-        return (int) $this->equipment->price;
+        return (int) floor(($this->equipment?->price ?? 0) / 2);
     }
 
     public function getName(): string
     {
-        return $this->equipment->name;
+        return $this->equipment?->name ?? 'Equipamento';
     }
 
     public function removeFromUser(User $user, int $quantity = 1): void
     {
+        if ($user->armor_id === $this->equipment_id) {
+            $user->armor_id = null;
+            $user->save();
+        }
+        if ($user->weapon_id === $this->equipment_id) {
+            $user->weapon_id = null;
+            $user->save();
+        }
         $this->delete();
     }
 
     public function validateInventory(User $user, int $quantity = 1): void
     {
         if ($this->user_id !== $user->id) {
-            throw new \RuntimeException("You don’t own this {$this->getName()}.");
+            throw new \RuntimeException("Você não possui este equipamento.");
         }
     }
 }

@@ -12,12 +12,22 @@ class GameParam extends Model
     protected $fillable = [
         'name',
         'type',
-        'related_id',
-        'related_type',
+        'target_id',
+        'target_type',
     ];
 
-    public function related()
+    public function target()
     {
         return $this->morphTo();
+    }
+
+    public function scopeRequirements($query)
+    {
+        return $query->where('type', 'requirement');
+    }
+
+    public function scopeRewards($query)
+    {
+        return $query->where('type', 'reward');
     }
 }

@@ -8,6 +8,8 @@ use Livewire\Component;
 
 class Hooker extends Component
 {
+    protected $listeners = ['user-stats-updated' => '$refresh'];
+
     public array $amounts = [];
 
     public function buyHooker($hookerId, GameFacade $game)
