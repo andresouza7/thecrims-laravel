@@ -16,9 +16,15 @@ class CheckUserCareer
      */
     public function handle(Request $request, Closure $next): Response
     {
+        if ($request->is('livewire*') || $request->hasHeader('X-Livewire')) {
+            return $next($request);
+        }
+
         $user = $request->user() ?? User::first();
         
-        if (!$user->career && !$request->is('career*')) return to_route('career.index');
+        if ($user && !$user->career && !$request->is('career*')) {
+            return to_route('career.index');
+        }
 
         return $next($request);
     }

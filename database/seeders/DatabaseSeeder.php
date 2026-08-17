@@ -37,7 +37,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             CareerLevelSeeder::class,
-            CareerLevelParamSeeder::class,
+            // CareerLevelParamSeeder::class,
         ]);
     }
 }

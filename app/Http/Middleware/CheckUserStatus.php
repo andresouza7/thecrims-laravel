@@ -14,6 +14,10 @@ class CheckUserStatus
 
     public function handle(Request $request, Closure $next): Response
     {
+        if ($request->is('livewire*') || $request->hasHeader('X-Livewire')) {
+            return $next($request);
+        }
+
         $user = Auth::user() ?? User::first();
         if (! $user) return $next($request);
 
