@@ -16,7 +16,7 @@ beforeEach(function () {
 
     $this->drug = Drug::factory()->create([
         'name' => 'Teste Drug',
-        'price' => 75, // should require 2 * (75 * 0.12) = 18 components per unit of drug
+        'price' => 75, // should require 2 + (75 * 0.2) = 17 components per unit of drug
     ]);
 
     $this->component = Component::factory()->create([
@@ -43,13 +43,13 @@ beforeEach(function () {
 });
 
 test('drug getComponentsPerUnit returns correct ratio based on price', function () {
-    expect($this->drug->getComponentsPerUnit())->toBe(18);
+    expect($this->drug->getComponentsPerUnit())->toBe(17);
 
     $cheapDrug = Drug::factory()->create(['price' => 12]);
-    expect($cheapDrug->getComponentsPerUnit())->toBe(2);
+    expect($cheapDrug->getComponentsPerUnit())->toBe(4);
 
     $expensiveDrug = Drug::factory()->create(['price' => 124]);
-    expect($expensiveDrug->getComponentsPerUnit())->toBe(29);
+    expect($expensiveDrug->getComponentsPerUnit())->toBe(26);
 });
 
 test('cannot upgrade factory or laboratory past level 3', function () {
@@ -64,13 +64,13 @@ test('cannot upgrade factory or laboratory past level 3', function () {
 
 test('laboratory production calculates drug yield and removes correct components amount', function () {
     // Request to produce 100 units of drug.
-    // 100 * 18 = 1,800 components required.
+    // 100 * 17 = 1,700 components required.
     $initialAmount = $this->component->getAmountForUser($this->user);
 
     $this->actionService->createLabProduction($this->userFactory, $this->component->id, 100);
 
     // Verify component inventory reduction
-    expect($this->component->refresh()->getAmountForUser($this->user))->toBe($initialAmount - 1800);
+    expect($this->component->refresh()->getAmountForUser($this->user))->toBe($initialAmount - 1700);
 
     // Verify production record has drug yield of 100
     $production = LabProduction::where('user_factory_id', $this->userFactory->id)->first();
@@ -79,9 +79,9 @@ test('laboratory production calculates drug yield and removes correct components
 });
 
 test('laboratory capacity scale limits component processing quantity', function () {
-    // Level 1 max capacity = 50,000. Try to produce 3,000 units of drug which requires 54,000 components.
+    // Level 1 max capacity = 50,000. Try to produce 3,000 units of drug which requires 51,000 components.
     $this->expectException(\RuntimeException::class);
-    $this->expectExceptionMessage("O laboratório nível 1 pode processar no máximo 50,000 componentes por fila. A produção de 3,000 unidades exige 54,000 componentes.");
+    $this->expectExceptionMessage("O laboratório nível 1 pode processar no máximo 50,000 componentes por fila. A produção de 3,000 unidades exige 51,000 componentes.");
 
     $this->actionService->createLabProduction($this->userFactory, $this->component->id, 3000);
 });

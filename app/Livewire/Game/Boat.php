@@ -5,27 +5,31 @@ namespace App\Livewire\Game;
 use App\Models\Boat as BoatModel;
 use App\Services\GameFacade;
 use Livewire\Component;
+use Livewire\Attributes\On;
 
 class Boat extends Component
 {
     public array $amounts = [];
 
+    protected $listeners = ['user-stats-updated' => '$refresh'];
+
     public function sell($boatId, GameFacade $game)
     {
-        $amount = $this->amounts[$boatId] ?? 0;
+        $amount = (int) ($this->amounts[$boatId] ?? 0);
 
         if ($amount <= 0) {
-            session()->flash('error', 'Informe uma quantidade válida!');
+            $this->dispatch('toast', type: 'error', message: 'Informe uma quantidade válida!');
             return;
         }
 
         try {
             $boat = BoatModel::findOrFail($boatId);
             $game->boat()->sellToBoat($boat, $amount);
+            $this->amounts[$boatId] = '';
             $this->dispatch('user-stats-updated');
-            session()->flash('message', 'Drogas vendidas com sucesso para o navio!');
+            $this->dispatch('toast', type: 'success', message: 'Drogas vendidas com sucesso para o navio!');
         } catch (\Throwable $th) {
-            session()->flash('error', $th->getMessage());
+            $this->dispatch('toast', type: 'error', message: $th->getMessage());
         }
     }
 

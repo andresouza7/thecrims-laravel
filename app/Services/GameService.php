@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 class GameService
 {
     protected const GAME_DAYS = 30;
-    protected const GAME_DAY_DURATION_MINUTES = 1;
+    public const GAME_DAY_DURATION_MINUTES = 3;
     protected const GAME_HOURS_PER_DAY = 24;
     protected const VITALS_RESTORE_INTERVAL_MIN = 1;
 

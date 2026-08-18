@@ -39,7 +39,7 @@ class BoatService
 
     public static function scheduleBoats(): void
     {
-        $days = [3, 8, 13, 18, 23, 28];
+        $days = [1, 2, 3, 8, 13, 18, 23, 28];
 
         // Fetch drug IDs once
         $drugs = Drug::pluck('id')->all();
@@ -80,6 +80,15 @@ class BoatService
             ->orderBy('day', 'asc')
             ->first();
 
+        // Boat profits for player
+        $boatProfits = $user->boat_profits ?? 0;
+
+        if ($currentBoat) {
+            $boost = self::getBoatSellBoost($boatProfits);
+            $multiplier = $boost ? $boost['multiplier'] : 1.0;
+            $currentBoat->price = self::getSellPrice($currentBoat->drug->price, $multiplier);
+        }
+
         // Owned amount
         $ownedAmount = $currentBoat ? $currentBoat->drug->getAmountForUser($user) : 0;
 
@@ -89,6 +98,12 @@ class BoatService
             ->where('is_gone', false)
             ->orderBy('day', 'asc')
             ->first();
+
+        if ($nextBoat) {
+            $boost = self::getBoatSellBoost($boatProfits);
+            $multiplier = $boost ? $boost['multiplier'] : 1.0;
+            $nextBoat->price = self::getSellPrice($nextBoat->drug->price, $multiplier);
+        }
 
         // Past boats
         $pastBoats = Boat::with('drug')
@@ -101,9 +116,6 @@ class BoatService
             ])
             ->all();
 
-        // Boat profits for player
-        $boatProfits = $user->boat_profits ?? 0;
-
         // Return combined data as normal PHP array
         return [
             'current_boat' => $currentBoat ? $currentBoat->toArray() : null,
@@ -111,6 +123,10 @@ class BoatService
             'past_boats'   => $pastBoats,
             'boat_profits' => $boatProfits,
             'owned_amount' => $ownedAmount,
+            'boats'        => $currentBoat ? collect([$currentBoat]) : collect(),
+            'current_boost'=> self::getBoatSellBoost($boatProfits),
+            'next_boost'   => self::getNextBoatBoostInfo($boatProfits),
+            'all_boosts'   => self::$boosts,
         ];
     }
 
@@ -119,14 +135,19 @@ class BoatService
         DB::transaction(function () use ($boat, $amount) {
             $boat->drug->validateInventory($this->user, $amount);
             $currentDay = GameService::getGameDay();
-            
+
             if ($boat->day !== $currentDay) {
                 throw new \RuntimeException("Boat day {$boat->day} does not match current game day {$currentDay}.");
             }
 
-            $profit = $boat->drug->price * $amount;
-            $this->action->sell($boat->drug, $amount);
+            $boost = self::getBoatSellBoost($this->user->boat_profits ?? 0);
+            $multiplier = $boost ? $boost['multiplier'] : 1.0;
+            $unitPrice = self::getSellPrice($boat->drug->price, $multiplier);
 
+            $profit = $unitPrice * $amount;
+
+            $boat->drug->removeFromUser($this->user, $amount);
+            $this->user->adjustCash($profit);
             $this->user->increment('boat_profits', $profit);
         });
     }

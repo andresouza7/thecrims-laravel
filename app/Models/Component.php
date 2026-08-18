@@ -43,8 +43,11 @@ class Component extends Model implements Sellable, Stackable
 
     public function addToUser(User $user, int $quantity = 1): void
     {
+        $row = $this->users()->where('user_id', $user->id)->first();
+        $currentAmount = $row ? $row->pivot->amount : 0;
+
         $this->users()->syncWithoutDetaching([
-            $user->id => ['amount' => DB::raw("COALESCE(amount,0)+$quantity")],
+            $user->id => ['amount' => $currentAmount + $quantity],
         ]);
     }
 

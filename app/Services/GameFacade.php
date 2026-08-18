@@ -9,14 +9,15 @@ class GameFacade
 {
     public User $user;
 
-    protected $actionService;
-    protected $boatService;
+    protected ActionService $actionService;
+    protected BoatService $boatService;
 
     public function __construct()
     {
-        $this->user = Auth::user() ?? User::with(['armor', 'weapon'])->first();
-        $this->actionService = new ActionService($this->user);
-        $this->boatService = new BoatService($this->user, $this->actionService);
+        $user = Auth::user() ?? User::with(['armor', 'weapon'])->first() ?? new User();
+        $this->user = $user;
+        $this->actionService = new ActionService($user);
+        $this->boatService = new BoatService($user, $this->actionService);
     }
 
     public function action(): ActionService
