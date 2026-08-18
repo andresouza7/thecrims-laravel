@@ -161,7 +161,10 @@ class ActionService
     // ==================== FACTORY ======================
     public function upgradeFactory(UserFactory $userFactory): int
     {
-        $cost = 2000;
+        if ($userFactory->level >= 3) {
+            throw new \RuntimeException("O nível máximo permitido para upgrade é 3.");
+        }
+        $cost = $userFactory->getUpgradeCost();
         DB::transaction(function () use ($userFactory, $cost) {
             $this->user->validateFunds($cost);
             $this->user->adjustCash(-$cost);
@@ -208,23 +211,43 @@ class ActionService
 
     private function calculateProductionDuration(int $basePerUnit, int $amount, int $level, float $minFactor = 0.2): int
     {
-        $total = $basePerUnit * $amount;
+        // Efeito suavizador usando a raiz quadrada (sqrt)
+        // Duração base de 2 minutos + raiz quadrada da quantidade de componentes (dividido por 1000 para escala)
+        $scaledAmount = (int) max(1, $amount / 1000);
+        $total = 2 + (int) floor(sqrt($scaledAmount));
 
-        // 5% faster per level, but not lower than $minFactor
-        $factor = max($minFactor, 1 - ($level * 0.05));
+        // Redução progressiva de acordo com o nível
+        $factor = max($minFactor, 1.0 / $level);
 
-        return (int) round($total * $factor);
+        return (int) max(1, (int) round($total * $factor));
     }
 
     public function createLabProduction(UserFactory $userFactory, int $componentId, int $amount): void
     {
         DB::transaction(function () use ($userFactory, $componentId, $amount) {
+            // Filas simultâneas de produção limitadas ao nível do laboratório
+            $activeCount = $userFactory->productions()->count();
+            if ($activeCount >= $userFactory->level) {
+                throw new \RuntimeException("O laboratório nível {$userFactory->level} suporta no máximo {$userFactory->level} produção(ões) simultânea(s).");
+            }
+
             $component = Component::findOrFail($componentId);
-            $component->validateInventory($this->user, $amount);
+            $componentsPerUnit = $component->drug->getComponentsPerUnit();
 
-            $component->removeFromUser($this->user, $amount);
+            // Quantidade de componentes necessária para produzir a quantidade solicitada de droga
+            $requiredComponents = $amount * $componentsPerUnit;
 
-            $duration = $this->calculateProductionDuration(1, $amount, $userFactory->level);
+            // Capacidade total de processamento de componentes limitada à capacidade por nível (escala de 1000)
+            $maxCapacity = $userFactory->factory->production * $userFactory->level * 1000;
+            if ($requiredComponents > $maxCapacity) {
+                throw new \RuntimeException("O laboratório nível {$userFactory->level} pode processar no máximo " . number_format($maxCapacity) . " componentes por fila. A produção de " . number_format($amount) . " unidades exige " . number_format($requiredComponents) . " componentes.");
+            }
+
+            $component->validateInventory($this->user, $requiredComponents);
+
+            $component->removeFromUser($this->user, $requiredComponents);
+
+            $duration = $this->calculateProductionDuration(1, $requiredComponents, $userFactory->level);
 
             LabProduction::create([
                 'drug_id'         => $component->drug_id,

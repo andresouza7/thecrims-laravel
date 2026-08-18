@@ -9,12 +9,17 @@ use Livewire\Component;
 
 class Lab extends Component
 {
+    protected $listeners = ['user-stats-updated' => '$refresh'];
+
     public UserFactory $userFactory;
     public $component_id;
     public $amount = 1;
 
     public function mount(UserFactory $userFactory)
     {
+        if (!$userFactory->factory || !$userFactory->factory->is_lab) {
+            abort(403);
+        }
         $this->userFactory = $userFactory;
     }
 
@@ -62,11 +67,39 @@ class Lab extends Component
     public function render()
     {
         $this->userFactory->load(['factory.drug', 'productions.drug']);
-        $components = $this->userFactory->user->components;
+        $components = $this->userFactory->user->components()->with('drug')->get();
+
+        $requiredComponents = 0;
+        $estimatedDuration = 0;
+        $componentsPerUnit = 0;
+        $maxProduceableDrugs = 0;
+        $selectedDrugName = '';
+
+        if ($this->component_id && $this->amount > 0) {
+            $selectedComponent = $components->firstWhere('id', $this->component_id);
+            if ($selectedComponent && $selectedComponent->drug) {
+                $componentsPerUnit = $selectedComponent->drug->getComponentsPerUnit();
+                $requiredComponents = $this->amount * $componentsPerUnit;
+                $selectedDrugName = $selectedComponent->drug->name;
+
+                $playerComponentAmount = $selectedComponent->pivot ? $selectedComponent->pivot->amount : 0;
+                $maxProduceableDrugs = (int) floor($playerComponentAmount / $componentsPerUnit);
+
+                $scaledAmount = (int) max(1, $requiredComponents / 1000);
+                $total = 2 + (int) floor(sqrt($scaledAmount));
+                $factor = max(0.2, 1.0 / $this->userFactory->level);
+                $estimatedDuration = (int) max(1, (int) round($total * $factor));
+            }
+        }
 
         return view('livewire.game.lab', [
             'lab' => $this->userFactory,
             'components' => $components,
+            'requiredComponents' => $requiredComponents,
+            'maxProduceableDrugs' => $maxProduceableDrugs,
+            'estimatedDuration' => $estimatedDuration,
+            'componentsPerUnit' => $componentsPerUnit,
+            'selectedDrugName' => $selectedDrugName,
         ]);
     }
 }

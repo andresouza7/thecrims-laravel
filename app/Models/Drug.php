@@ -19,6 +19,11 @@ class Drug extends Model implements Buyable, Sellable, Stackable
         return (int) $this->price;
     }
 
+    public function getComponentsPerUnit(): int
+    {
+        return 2 + ((int) $this->price * 0.2);
+    }
+
     public function getName(): string
     {
         return $this->name;

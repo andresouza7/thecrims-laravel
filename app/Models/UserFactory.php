@@ -4,11 +4,18 @@ namespace App\Models;
 
 use App\Interfaces\Sellable;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
+use App\Models\Factory;
+use App\Models\LabProduction;
 
 class UserFactory extends Model implements Sellable
 {
     protected $fillable = [
-        'user_id', 'factory_id', 'level', 'investment', 'stash'
+        'user_id',
+        'factory_id',
+        'level',
+        'investment',
+        'stash'
     ];
 
     public function user()
@@ -21,13 +28,14 @@ class UserFactory extends Model implements Sellable
         return $this->belongsTo(Factory::class);
     }
 
-    public function productions() {
+    public function productions()
+    {
         return $this->hasMany(LabProduction::class)->with('drug');
     }
 
     public function getPrice(): int
     {
-        return (int) $this->factory->price;
+        return (int) $this->investment;
     }
 
     public function getName(): string
@@ -43,8 +51,17 @@ class UserFactory extends Model implements Sellable
     public function validateInventory(User $user, int $quantity = 1): void
     {
         if ($this->user_id !== $user->id) {
-            throw new \RuntimeException("You don’t own this {$this->getName()}.");
+            throw new \RuntimeException("Você não possui esta fábrica: {$this->getName()}.");
         }
+
+        if ($this->factory->is_lab && $this->productions()->exists()) {
+            throw new \RuntimeException("Não é possível vender o laboratório enquanto houver produções em andamento ou prontas para coleta.");
+        }
+    }
+
+    public function getUpgradeCost(): int
+    {
+        return (int) ($this->factory->price * 0.5 * $this->level);
     }
 
     public function levelUp(int $cost): void
@@ -53,4 +70,3 @@ class UserFactory extends Model implements Sellable
         $this->increment('investment', $cost);
     }
 }
-

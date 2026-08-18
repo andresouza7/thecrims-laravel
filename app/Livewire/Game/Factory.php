@@ -9,6 +9,8 @@ use Livewire\Component;
 
 class Factory extends Component
 {
+    protected $listeners = ['user-stats-updated' => '$refresh'];
+
     public function buyFactory($factoryId, GameFacade $game)
     {
         try {
@@ -63,8 +65,14 @@ class Factory extends Component
     public function render(GameFacade $game)
     {
         return view('livewire.game.factory', [
-            'factories' => FactoryModel::with('drug')->orderBy('name')->get(),
-            'owned' => $game->user->factories,
+            'factories' => FactoryModel::with('drug')->orderBy('is_lab', 'asc')->orderBy('price', 'asc')->get(),
+            'owned' => UserFactory::with('factory.drug')
+                ->where('user_id', $game->user->id)
+                ->join('factories', 'factories.id', '=', 'user_factories.factory_id')
+                ->orderBy('factories.is_lab', 'asc')
+                ->orderBy('factories.price', 'asc')
+                ->select('user_factories.*')
+                ->get(),
         ]);
     }
 }

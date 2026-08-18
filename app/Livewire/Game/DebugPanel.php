@@ -35,6 +35,10 @@ class DebugPanel extends Component
     public $selectedHookerId;
     public $hookerAmount;
 
+    // Component management
+    public $selectedComponentId;
+    public $componentAmount;
+
     // Equipment management
     public $selectedEquipmentId;
 
@@ -70,6 +74,11 @@ class DebugPanel extends Component
             $userHooker = DB::table('user_hookers')->where('user_id', $user->id)->where('hooker_id', $this->selectedHookerId)->first();
             $this->hookerAmount = $userHooker ? $userHooker->amount : 0;
         }
+
+        if ($this->selectedComponentId) {
+            $userComponent = DB::table('user_components')->where('user_id', $user->id)->where('component_id', $this->selectedComponentId)->first();
+            $this->componentAmount = $userComponent ? $userComponent->amount : 0;
+        }
     }
 
     public function updatedSelectedDrugId($val)
@@ -88,6 +97,15 @@ class DebugPanel extends Component
         if ($val && $user) {
             $userHooker = DB::table('user_hookers')->where('user_id', $user->id)->where('hooker_id', $val)->first();
             $this->hookerAmount = $userHooker ? $userHooker->amount : 0;
+        }
+    }
+
+    public function updatedSelectedComponentId($val)
+    {
+        $user = auth()->user() ?? \App\Models\User::first();
+        if ($val && $user) {
+            $userComponent = DB::table('user_components')->where('user_id', $user->id)->where('component_id', $val)->first();
+            $this->componentAmount = $userComponent ? $userComponent->amount : 0;
         }
     }
 
@@ -139,6 +157,22 @@ class DebugPanel extends Component
 
         $this->dispatch('user-stats-updated');
         $this->dispatch('toast', type: 'info', message: 'Prostituta atualizada!');
+    }
+
+    public function updateComponent(GameFacade $game)
+    {
+        if (!$this->selectedComponentId) return;
+
+        DB::table('user_components')->updateOrInsert(
+            ['user_id' => $game->user->id, 'component_id' => $this->selectedComponentId],
+            [
+                'amount' => max(0, (int) $this->componentAmount),
+                'updated_at' => now(),
+            ]
+        );
+
+        $this->dispatch('user-stats-updated');
+        $this->dispatch('toast', type: 'info', message: 'Componente atualizado!');
     }
 
     public function toggleEquipment(GameFacade $game)
@@ -318,12 +352,14 @@ class DebugPanel extends Component
     {
         $drugs = Drug::orderBy('name')->get();
         $hookers = Hooker::orderBy('name')->get();
+        $components = \App\Models\Component::orderBy('name')->get();
         $equipment = Equipment::orderBy('name')->get();
         $userEquipmentIds = auth()->check() ? auth()->user()->equipment()->pluck('equipment_id')->toArray() : [];
 
         return view('livewire.game.debug-panel', [
             'drugs' => $drugs,
             'hookers' => $hookers,
+            'components' => $components,
             'equipment' => $equipment,
             'userEquipmentIds' => $userEquipmentIds,
         ]);

@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Models\Drug;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -18,12 +17,13 @@ class FactoryFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->company,
-            'price' => $this->faker->numberBetween(1000, 100000),
-            'production' => $this->faker->numberBetween(1, 100),
-            'maintenance' => $this->faker->numberBetween(100, 5000),
-            'avatar' => $this->faker->imageUrl(200, 200, 'business'),
-            'drug_id' => Drug::inRandomOrder()->value('id') ?? Drug::factory()->create()->id,
+            'name' => fake()->word() . ' Factory',
+            'price' => 50000,
+            'production' => 50,
+            'maintenance' => 1000,
+            'is_lab' => false,
+            'drug_id' => null,
+            'avatar' => fake()->imageUrl(),
         ];
     }
 }

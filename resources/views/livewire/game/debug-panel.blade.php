@@ -154,6 +154,30 @@
                 @endif
             </div>
 
+            <!-- Component Manipulator -->
+            <div class="space-y-2.5 p-2.5 mb-3 bg-gray-900/80 border border-gray-800 rounded-lg">
+                <h4 class="font-bold text-teal-400 uppercase tracking-wider text-[9px]">🧪 Componentes</h4>
+                <div class="text-[11px]">
+                    <label class="block text-gray-400 mb-0.5">Selecione o Componente</label>
+                    <select wire:model.live="selectedComponentId" class="w-full p-1.5 bg-gray-950 border border-gray-800 rounded text-gray-100 text-xs">
+                        <option value="">Selecione...</option>
+                        @foreach ($components as $c)
+                            <option value="{{ $c->id }}">{{ $c->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                @if ($selectedComponentId)
+                    <div class="text-[11px]">
+                        <label class="block text-gray-400 mb-0.5">Quantidade Possuída</label>
+                        <input type="number" wire:model="componentAmount" class="w-full p-1.5 bg-gray-950 border border-gray-800 rounded text-gray-100 text-xs">
+                    </div>
+                    <button wire:click="updateComponent" type="button" class="w-full py-1.5 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded transition text-xs">
+                        Atualizar Componente
+                    </button>
+                @endif
+            </div>
+
             <!-- Equipment Manipulator -->
             <div class="space-y-2.5 p-2.5 mb-3 bg-gray-900/80 border border-gray-800 rounded-lg">
                 <h4 class="font-bold text-blue-400 uppercase tracking-wider text-[9px]">🛡️ Equipamentos</h4>

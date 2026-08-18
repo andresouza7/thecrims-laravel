@@ -175,6 +175,7 @@ class GameService
             SET uf.stash = uf.stash + (f.production * uf.level)
             WHERE u.cash >= f.maintenance
               AND f.drug_id IS NOT NULL
+              AND f.is_lab = 0
         ");
     }
 

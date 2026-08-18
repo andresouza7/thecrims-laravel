@@ -18,7 +18,8 @@ return new class extends Migration
             $table->integer('production');
             $table->integer('maintenance');
             $table->string('avatar');
-            $table->foreignId('drug_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('drug_id')->nullable()->constrained()->cascadeOnDelete();
+            $table->boolean('is_lab')->default(false);
             $table->timestamps();
         });
     }
