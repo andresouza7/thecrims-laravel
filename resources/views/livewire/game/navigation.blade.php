@@ -135,29 +135,7 @@
         </span>
     @endif
 
-    <!-- Inventário -->
-    @if ($user?->canAccessPath('inventory'))
-        <a href="{{ route('inventory.index') }}" wire:navigate.hover
-            class="px-3 py-1.5 rounded transition {{ request()->routeIs('inventory.*') ? 'bg-indigo-600 text-white font-semibold' : 'text-gray-300 hover:bg-gray-800 hover:text-white' }}">
-            Inventário
-        </a>
-    @else
-        <span class="px-3 py-1.5 rounded text-gray-500 opacity-40 cursor-not-allowed select-none flex items-center gap-1 bg-gray-950/40 border border-transparent">
-            Inventário 🔒
-        </span>
-    @endif
 
-    <!-- Carreira -->
-    @if ($user?->canAccessPath('career'))
-        <a href="{{ route('career.about') }}" wire:navigate.hover
-            class="px-3 py-1.5 rounded transition {{ request()->routeIs('career.*') ? 'bg-indigo-600 text-white font-semibold' : 'text-gray-300 hover:bg-gray-800 hover:text-white' }}">
-            Carreira
-        </a>
-    @else
-        <span class="px-3 py-1.5 rounded text-gray-500 opacity-40 cursor-not-allowed select-none flex items-center gap-1 bg-gray-950/40 border border-transparent">
-            Carreira 🔒
-        </span>
-    @endif
 
     <!-- Admin -->
     @if ($user?->canAccessPath('admin'))

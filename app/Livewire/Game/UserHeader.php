@@ -24,8 +24,18 @@ class UserHeader extends Component
         $url = ($isLivewire && $referer) ? parse_url($referer, PHP_URL_PATH) : request()->path();
         $currentPath = trim(str_replace(request()->getBaseUrl(), '', $url), '/');
 
-        $shouldRedirect = $user && !$user->canAccessPath($currentPath);
-        $redirectUrl = $shouldRedirect ? ($user->in_jail ? route('jail.index') : route('hospital.index')) : '';
+        $shouldRedirect = false;
+        $redirectUrl = '';
+
+        if ($user) {
+            if (!$user->career_id && !str_starts_with($currentPath, 'career')) {
+                $shouldRedirect = true;
+                $redirectUrl = route('career.about');
+            } elseif (!$user->canAccessPath($currentPath)) {
+                $shouldRedirect = true;
+                $redirectUrl = $user->in_jail ? route('jail.index') : route('hospital.index');
+            }
+        }
 
         return view('livewire.game.user-header', [
             'user' => $user,

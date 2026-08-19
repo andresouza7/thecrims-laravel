@@ -347,6 +347,52 @@ class ActionService
         $this->user->save();
     }
 
+    public function calculateStaminaBoostCost(): int
+    {
+        return max(100, (int) ($this->user->respect * 5));
+    }
+
+    public function calculateDetoxCost(): int
+    {
+        return max(200, (int) ($this->user->respect * 10));
+    }
+
+    public function buyStaminaBoost(): void
+    {
+        $cost = $this->calculateStaminaBoostCost();
+
+        if ($this->user->stamina >= 100) {
+            throw new \RuntimeException("Sua stamina já está cheia!");
+        }
+
+        $this->user->validateFunds($cost);
+
+        DB::transaction(function () use ($cost) {
+            $this->user->adjustCash(-$cost);
+            $this->user->stamina = 100;
+            $this->user->addiction = min(100, $this->user->addiction + 15);
+            $this->user->save();
+        });
+    }
+
+    public function buyDetoxification(): void
+    {
+        $cost = $this->calculateDetoxCost();
+
+        if ($this->user->addiction <= 0) {
+            throw new \RuntimeException("Você não possui nenhum vício para tratar!");
+        }
+
+        $this->user->validateFunds($cost);
+
+        DB::transaction(function () use ($cost) {
+            $this->user->adjustCash(-$cost);
+            $this->user->addiction = 0;
+            $this->user->save();
+        });
+    }
+
+    // ==================== BOATE ======================
     public function fight(User $victim): array
     {
         $attacker = $this->user;

@@ -51,8 +51,11 @@
             <div class="space-y-1">
                 <div><span class="text-gray-400">Nome:</span> <span
                         class="font-semibold text-white">{{ $user->name }}</span></div>
-                <div><span class="text-gray-400">Carreira:</span> <span
-                        class="text-amber-400 font-medium">{{ $user->career?->name ?? 'Nenhuma' }}</span></div>
+                <div><span class="text-gray-400">Carreira:</span>
+                    <a href="{{ route('career.about') }}" wire:navigate.hover class="text-amber-400 hover:text-amber-300 hover:underline font-medium">
+                        {{ $user->career?->name ?? 'Nenhuma' }}
+                    </a>
+                </div>
                 <div><span class="text-gray-400">Grana:</span> <span
                         class="text-emerald-400 font-semibold">${{ number_format($user->cash) }}</span></div>
                 <div><span class="text-gray-400">Respeito:</span> <span
@@ -85,6 +88,11 @@
                 <h5 class="font-semibold text-xs text-gray-400 uppercase tracking-wider mb-1">Equipamento</h5>
                 <div>Armadura: <span class="font-medium text-blue-300">{{ $user->armor?->name ?? '-' }}</span></div>
                 <div>Arma: <span class="font-medium text-red-300">{{ $user->weapon?->name ?? '-' }}</span></div>
+                <div class="pt-1">
+                    <a href="{{ route('inventory.index') }}" wire:navigate.hover class="text-yellow-400 hover:text-yellow-350 hover:underline font-semibold text-xs inline-flex items-center gap-1">
+                        📦 Inventário
+                    </a>
+                </div>
             </div>
         </div>
     @endif
