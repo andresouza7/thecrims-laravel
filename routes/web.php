@@ -14,6 +14,7 @@ use App\Livewire\Game\Jail as GameJail;
 use App\Livewire\Game\Lab as GameLab;
 use App\Livewire\Game\Market\Index as GameMarketIndex;
 use App\Livewire\Game\Nightclub as GameNightclub;
+use App\Livewire\Game\Robbery as GameRobbery;
 use App\Services\GameService;
 use Illuminate\Support\Facades\Route;
 
@@ -53,6 +54,10 @@ Route::prefix('/nightclub')->group(function () {
 
 Route::prefix('/boat')->group(function () {
     Route::get('/', GameBoat::class)->name('boat.index');
+});
+
+Route::prefix('/robbery')->group(function () {
+    Route::get('/', GameRobbery::class)->name('robbery.index');
 });
 
 Route::prefix('/jail')->group(function () {

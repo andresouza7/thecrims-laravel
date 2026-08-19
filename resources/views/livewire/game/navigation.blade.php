@@ -39,6 +39,18 @@
         </span>
     @endif
 
+    <!-- Roubos -->
+    @if ($user?->canAccessPath('robbery'))
+        <a href="{{ route('robbery.index') }}" wire:navigate.hover
+            class="px-3 py-1.5 rounded transition {{ request()->routeIs('robbery.*') ? 'bg-indigo-600 text-white font-semibold' : 'text-gray-300 hover:bg-gray-800 hover:text-white' }}">
+            Roubos
+        </a>
+    @else
+        <span class="px-3 py-1.5 rounded text-gray-500 opacity-40 cursor-not-allowed select-none flex items-center gap-1 bg-gray-950/40 border border-transparent">
+            Roubos 🔒
+        </span>
+    @endif
+
     <!-- Prostitutas -->
     @if ($user?->canAccessPath('hooker'))
         <a href="{{ route('hooker.indexs') }}" wire:navigate.hover

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('robberies', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('description');
             $table->integer('required_power');
             $table->integer('required_stamina');
             $table->string('type');

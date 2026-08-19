@@ -118,6 +118,7 @@ class DatabaseSeeder extends Seeder
             CareerLevelSeeder::class,
             GameParamSeeder::class,
             CareerLevelParamSeeder::class,
+            RobberySeeder::class,
         ]);
 
         \App\Services\GameService::createRound();

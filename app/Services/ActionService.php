@@ -415,4 +415,136 @@ class ActionService
             ];
         });
     }
+
+    // ==================== ROBBERY ======================
+    public function calculateSuccessChance(\App\Models\Robbery $robbery): int
+    {
+        if ($robbery->required_power <= 0) {
+            return 100;
+        }
+        $chance = (int) floor(($this->user->single_robbery_power / $robbery->required_power) * 100);
+        return $chance > 100 ? 100 : $chance;
+    }
+
+    public function executeRobbery(\App\Models\Robbery $robbery): array
+    {
+        if ($this->user->in_jail || $this->user->in_hospital) {
+            throw new \RuntimeException("Você não pode realizar roubos no momento!");
+        }
+
+        if ($this->user->stamina < $robbery->required_stamina) {
+            throw new \RuntimeException("Você não possui stamina suficiente para este roubo!");
+        }
+
+        return DB::transaction(function () use ($robbery) {
+            // Deduct stamina
+            $this->user->stamina = max(0, $this->user->stamina - $robbery->required_stamina);
+            $this->user->save();
+
+            // Calculate chance
+            $chance = $this->calculateSuccessChance($robbery);
+            $isSuccess = $chance >= 100 || (rand(1, 100) <= $chance);
+
+            if ($isSuccess) {
+                // Success: Adjust cash
+                if ($robbery->cash > 0) {
+                    $this->user->adjustCash($robbery->cash);
+                }
+
+                // Adjust stats & respect
+                $statReward = (int) max(1, floor(sqrt($robbery->required_power) / 2));
+                $this->user->adjustStats($statReward);
+                $this->user->save();
+
+                // Add drugs
+                if (!empty($robbery->drugs)) {
+                    foreach ($robbery->drugs as $d) {
+                        $drugModel = \App\Models\Drug::findOrFail($d['drug_id']);
+                        $drugModel->addToUser($this->user, $d['amount']);
+                    }
+                }
+
+                // Add components
+                if (!empty($robbery->components)) {
+                    foreach ($robbery->components as $c) {
+                        $compModel = \App\Models\Component::findOrFail($c['component_id']);
+                        $compModel->addToUser($this->user, $c['amount']);
+                    }
+                }
+
+                // Record success
+                $pivot = DB::table('user_robberies')
+                    ->where('user_id', $this->user->id)
+                    ->where('robbery_id', $robbery->id)
+                    ->first();
+                if ($pivot) {
+                    DB::table('user_robberies')
+                        ->where('id', $pivot->id)
+                        ->increment('success_count');
+                } else {
+                    DB::table('user_robberies')->insert([
+                        'user_id' => $this->user->id,
+                        'robbery_id' => $robbery->id,
+                        'success_count' => 1,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+
+                $successMessages = [
+                    "Sucesso! Você levou a melhor e a polícia comeu poeira. Pegue seu espólio!",
+                    "Operação concluída. O alvo nem viu de onde veio o golpe. Dinheiro fácil!",
+                    "Sensacional! Tudo correu como planejado e o lucro está garantido.",
+                    "Perfeito! Você limpou o local e saiu assobiando."
+                ];
+                $message = $successMessages[array_rand($successMessages)];
+
+                return [
+                    'success' => true,
+                    'message' => $message,
+                    'cash' => $robbery->cash,
+                    'drugs' => $robbery->drugs,
+                    'components' => $robbery->components,
+                ];
+            } else {
+                // Failure: Record fail
+                $pivot = DB::table('user_robberies')
+                    ->where('user_id', $this->user->id)
+                    ->where('robbery_id', $robbery->id)
+                    ->first();
+                if ($pivot) {
+                    DB::table('user_robberies')
+                        ->where('id', $pivot->id)
+                        ->increment('fail_count');
+                } else {
+                    DB::table('user_robberies')->insert([
+                        'user_id' => $this->user->id,
+                        'robbery_id' => $robbery->id,
+                        'fail_count' => 1,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+
+                // Send to jail for 2 minutes
+                $this->sendToJail(2);
+
+                $failMessages = [
+                    "Deu ruim! A polícia apareceu do nada e você levou um belo sermão antes de ver o sol nascer quadrado por 2 minutos.",
+                    "Fracasso! O alarme disparou, você tropeçou no próprio sapato e agora vai passar 2 minutos na cela limpando privada.",
+                    "Preso! O plano era perfeito, mas a execução... bem, você está em cana por 2 minutos!",
+                    "Que vergonha! Você foi pego por um segurança aposentado de 70 anos e agora está trancafiado por 2 minutos."
+                ];
+                $message = $failMessages[array_rand($failMessages)];
+
+                return [
+                    'success' => false,
+                    'message' => $message,
+                    'cash' => 0,
+                    'drugs' => [],
+                    'components' => [],
+                ];
+            }
+        });
+    }
 }
