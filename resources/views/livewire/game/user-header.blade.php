@@ -3,10 +3,17 @@
         <div x-data x-init="Livewire.navigate('{{ $redirectUrl }}')"></div>
     @endif
 
-    <h4 class="font-semibold text-gray-300 mb-3 border-b border-gray-800 pb-1">Status do Jogador</h4>
+    <div class="flex justify-between items-center mb-3 border-b border-gray-800 pb-1">
+        <h4 class="font-semibold text-gray-300">Status do Jogador</h4>
+        <div class="flex items-center gap-2 text-xs">
+            <span class="text-gray-400 font-medium">Tempo de Jogo:</span>
+            <span class="bg-gray-800 text-amber-400 font-mono px-2 py-0.5 rounded border border-gray-700 font-bold">Dia {{ $gameDay }}</span>
+            <span class="bg-gray-800 text-sky-400 font-mono px-2 py-0.5 rounded border border-gray-700 font-bold">{{ $gameTime }}</span>
+        </div>
+    </div>
 
     @if ($user)
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 text-sm">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 text-xs">
             <!-- Bars (Health, Stamina, Addiction) -->
             <div class="flex flex-col gap-2">
                 <!-- Health -->

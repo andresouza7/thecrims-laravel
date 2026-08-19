@@ -3,15 +3,23 @@
 namespace App\Livewire\Game;
 
 use App\Services\GameFacade;
+use App\Services\GameService;
 use Livewire\Component;
 use Livewire\Attributes\On;
 
 class UserHeader extends Component
 {
+    public int $lastKnownDay = 0;
+
     #[On('user-stats-updated')]
     public function refresh()
     {
         // Triggers re-render
+    }
+
+    public function mount()
+    {
+        $this->lastKnownDay = GameService::getGameDay();
     }
 
     public function render(GameFacade $game)
@@ -37,10 +45,23 @@ class UserHeader extends Component
             }
         }
 
+        $currentDay = GameService::getGameDay();
+        if ($this->lastKnownDay > 0 && $currentDay !== $this->lastKnownDay) {
+            $this->lastKnownDay = $currentDay;
+            $this->dispatch('user-stats-updated');
+            $this->dispatch('toast', type: 'info', message: "🗓️ O Dia {$currentDay} começou! Rendimentos e produções foram atualizados.");
+        } else {
+            $this->lastKnownDay = $currentDay;
+        }
+
+        $gameTime = GameService::getGameTime();
+
         return view('livewire.game.user-header', [
             'user' => $user,
             'shouldRedirect' => $shouldRedirect,
             'redirectUrl' => $redirectUrl,
+            'gameDay' => $currentDay,
+            'gameTime' => $gameTime,
         ]);
     }
 }

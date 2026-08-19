@@ -12,9 +12,6 @@
         <!-- Persistent User Header -->
         <livewire:game.user-header />
 
-        <!-- Persistent Game Info Bar -->
-        <livewire:game.game-info-bar />
-
         <!-- Persistent Navigation Bar -->
         <livewire:game.navigation />
 

@@ -29,14 +29,25 @@
                 
                 @if ($user && $user->in_hospital)
                     <!-- Caso o jogador esteja internado (em estado grave) -->
-                    <div class="space-y-4 text-center py-8">
-                        <p class="text-sm text-gray-300 leading-relaxed">
+                    <div class="space-y-4 text-center py-8 flex flex-col justify-center items-center">
+                        <div class="w-14 h-14 bg-red-950/50 border border-red-500/30 rounded-full flex items-center justify-center mx-auto text-2xl select-none animate-pulse mb-2">
+                            🩺
+                        </div>
+
+                        <div class="bg-gray-950/80 border border-gray-800 rounded-xl py-3 px-6 inline-block mx-auto shadow-inner mb-2">
+                            <div class="text-[10px] uppercase tracking-wider text-gray-500 font-bold mb-1">Tempo Restante de Internação</div>
+                            <div class="font-mono text-xl font-bold text-red-500">
+                                {{ $user->hospital_end_time }}
+                            </div>
+                        </div>
+
+                        <p class="text-sm text-gray-300 leading-relaxed max-w-sm">
                             Você está internado devido a ferimentos graves ou overdose. Você não pode cometer crimes ou circular até receber alta formal.
                         </p>
                         
                         <button wire:click="release" wire:loading.attr="disabled"
-                                class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg transition text-xs shadow-md">
-                            🩺 Receber Alta Médica (Liberar Personagem)
+                                class="w-full max-w-xs py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg transition text-xs shadow-md mt-2">
+                            🩺 Receber Alta Médica
                         </button>
                     </div>
                 @else
