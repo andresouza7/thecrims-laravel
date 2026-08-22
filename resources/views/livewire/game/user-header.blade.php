@@ -67,6 +67,8 @@
                         class="text-emerald-400 font-semibold">${{ number_format($user->cash) }}</span></div>
                 <div><span class="text-gray-400">Respeito:</span> <span
                         class="text-yellow-400 font-semibold">{{ number_format($user->respect) }}</span></div>
+                <div><span class="text-gray-400">Ingressos:</span> <span
+                        class="text-purple-400 font-semibold font-mono">{{ number_format($user->tickets) }}</span></div>
 
             </div>
 

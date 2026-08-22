@@ -53,25 +53,6 @@
                 @else
                     <!-- Caso o jogador esteja saudável e circulando livremente -->
                     <div class="space-y-4">
-                        <!-- Serviço 1: Injeção de Adrenalina Sintética (Energetico) -->
-                        <div class="p-4 bg-gray-950/80 border border-gray-850 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                            <div class="space-y-1 mt-1">
-                                <h4 class="text-sm font-bold text-amber-400">⚡ Sorinho Turbinado com Adrenalina</h4>
-                                <p class="text-xs text-gray-400 leading-relaxed">
-                                    Uma injeção concentrada de estimulantes para te deixar elétrico. Restaura <strong>100% da Stamina</strong> imediatamente.
-                                </p>
-                                <div class="text-[10px] text-purple-400 font-semibold">
-                                    ⚠️ Aumenta o Vício em +15%.
-                                </div>
-                            </div>
-                            <div class="w-full sm:w-auto text-right">
-                                <button wire:click="buyStamina" wire:loading.attr="disabled"
-                                        class="w-full sm:w-auto px-4 py-2 bg-yellow-500 hover:bg-yellow-450 text-gray-950 font-bold text-xs rounded transition shadow-md whitespace-nowrap">
-                                    Tomar (${{ number_format($staminaCost) }})
-                                </button>
-                            </div>
-                        </div>
-
                         <!-- Serviço 2: Desintoxicação -->
                         <div class="p-4 bg-gray-950/80 border border-gray-850 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                             <div class="space-y-1 mt-1">

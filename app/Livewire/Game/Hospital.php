@@ -20,17 +20,6 @@ class Hospital extends Component
         }
     }
 
-    public function buyStamina(GameFacade $game)
-    {
-        try {
-            $game->action()->buyStaminaBoost();
-            $this->dispatch('user-stats-updated');
-            $this->dispatch('toast', type: 'success', message: 'Você tomou a dose! Sua stamina foi restaurada a 100%, mas você se sente um pouco mais dependente...');
-        } catch (\Throwable $th) {
-            $this->dispatch('toast', type: 'error', message: $th->getMessage());
-        }
-    }
-
     public function buyDetox(GameFacade $game)
     {
         try {
@@ -47,12 +36,10 @@ class Hospital extends Component
         $user = $game->user;
         $user->refresh();
 
-        $staminaCost = $game->action()->calculateStaminaBoostCost();
         $detoxCost = $game->action()->calculateDetoxCost();
 
         return view('livewire.game.hospital', [
             'user' => $user,
-            'staminaCost' => $staminaCost,
             'detoxCost' => $detoxCost,
         ]);
     }

@@ -15,8 +15,8 @@
             <p class="text-xs text-gray-400">Compre laboratórios e produza drogas em larga escala.</p>
         </a>
 
-        <a href="{{ route('nightclub.index') }}" wire:navigate.hover class="p-4 bg-gray-800/80 hover:bg-gray-800 border border-gray-700 rounded-lg transition block space-y-1">
-            <h3 class="font-semibold text-purple-400 text-lg">🕺 Boates</h3>
+        <a href="{{ route('nightlife.index') }}" wire:navigate.hover class="p-4 bg-gray-800/80 hover:bg-gray-800 border border-gray-700 rounded-lg transition block space-y-1">
+            <h3 class="font-semibold text-purple-400 text-lg">🕺 Vida Noturna</h3>
             <p class="text-xs text-gray-400">Restaurar stamina e desafiar outros criminosos para lutas.</p>
         </a>
     </div>

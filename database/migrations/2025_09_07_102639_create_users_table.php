@@ -46,7 +46,7 @@ return new class extends Migration
 
             $table->unsignedBigInteger('available_stats')->default(0);
             $table->integer('dealer_transactions')->default(0);
-            $table->integer('tickets')->default(0);
+            $table->integer('tickets')->default(100);
             $table->timestamp('jail_end_time')->nullable();
             $table->timestamp('hospital_end_time')->nullable();
             $table->timestamp('hire_thieves_cooldown')->nullable();

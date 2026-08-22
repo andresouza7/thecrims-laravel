@@ -13,9 +13,10 @@ O jogo possui as seguintes interfaces e interações disponíveis para o jogador
    - Mostra o dia e a hora do jogo.
 2. **Banco (Bank):**
    - Permite depositar e retirar dinheiro. Dinheiro no banco rende juros a cada dia do jogo e fica protegido de roubos/ataques.
-3. **Boate (Nightclub):**
-   - Entrada custa ingressos (`tickets`).
-   - Permite consumir drogas disponíveis na boate para recuperar Energia (Stamina), com o risco de aumentar o Vício (Addiction) ou sofrer overdose se passar do limite.
+3. **Vida Noturna (Nightlife):**
+   - Dividida em dois estabelecimentos acessíveis: a **Boate** e a **Mansão das Putas**.
+   - **A Boate:** Permite consumir estimulantes para recuperar 100% de Stamina. O custo é proporcional ao respeito e à stamina faltante. Aumenta o vício em +15% e consome 1 ticket. Permite desafiar outros jogadores para lutas de rua.
+   - **Mansão das Putas:** Permite contratar acompanhante para recuperar 100% de Stamina. O custo é proporcional ao respeito do jogador. Consome 1 ticket. Há uma chance de 10% de contrair doenças e ser enviado para internação no Hospital por 2 minutos. Permite desafiar outros jogadores para lutas na área VIP.
 4. **Assaltos (Robbery):**
    - O jogador gasta energia para cometer assaltos.
    - Cada assalto exige um certo nível de Poder de Assalto Solo (`single_robbery_power`).

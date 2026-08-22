@@ -82,6 +82,7 @@ class GameService
         User::query()->update([
             'career_id' => null,
             'cash' => 1000,
+            'tickets' => 100,
             'bank' => 0,
             'health' => 50,
             'max_health' => 50,

@@ -13,7 +13,7 @@ use App\Livewire\Game\Inventory as GameInventory;
 use App\Livewire\Game\Jail as GameJail;
 use App\Livewire\Game\Lab as GameLab;
 use App\Livewire\Game\Market\Index as GameMarketIndex;
-use App\Livewire\Game\Nightclub as GameNightclub;
+use App\Livewire\Game\Nightlife as GameNightlife;
 use App\Livewire\Game\Robbery as GameRobbery;
 use App\Livewire\Game\Street as GameStreet;
 use App\Services\GameService;
@@ -49,8 +49,8 @@ Route::prefix('/factory')->group(function () {
     Route::get('/lab/{userFactory}', GameLab::class)->name('factory.show');
 });
 
-Route::prefix('/nightclub')->group(function () {
-    Route::get('/', GameNightclub::class)->name('nightclub.index');
+Route::prefix('/nightlife')->group(function () {
+    Route::get('/', GameNightlife::class)->name('nightlife.index');
 });
 
 Route::prefix('/boat')->group(function () {
