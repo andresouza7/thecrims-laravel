@@ -106,7 +106,7 @@ class About extends Component
                 $formattedRewards = $rawRews->map(function ($clp) {
                     $param = $clp->game_param;
                     $target = $param?->target;
-                    $name = $param->name;
+                    $name = \App\Enums\GameParamType::getLabel($param->name);
                     if ($target) {
                         $name .= " (" . ($target->name ?? 'Item') . ")";
                     }
@@ -152,7 +152,7 @@ class About extends Component
                     $reqs = $rawReqs->map(function ($clp) {
                         $param = $clp->game_param;
                         $target = $param?->target;
-                        $name = $param->name;
+                        $name = \App\Enums\GameParamType::getLabel($param->name);
                         if ($target) {
                             $name .= " (" . ($target->name ?? 'Item') . ")";
                         }
@@ -166,7 +166,7 @@ class About extends Component
                     $rews = $rawRews->map(function ($clp) {
                         $param = $clp->game_param;
                         $target = $param?->target;
-                        $name = $param->name;
+                        $name = \App\Enums\GameParamType::getLabel($param->name);
                         if ($target) {
                             $name .= " (" . ($target->name ?? 'Item') . ")";
                         }

@@ -78,7 +78,7 @@ class CareerService
         $completed = $current >= $total;
         $progress = min(100, (int) round(($current / max(1, $total)) * 100));
 
-        $displayName = $param->name;
+        $displayName = \App\Enums\GameParamType::getLabel($param->name);
         if ($target) {
             $displayName .= " (" . ($target->name ?? 'Item') . ")";
         }

@@ -11,6 +11,8 @@ class RobberySeeder extends Seeder
 {
     public function run(): void
     {
+
+
         $maconha = Drug::where('name', 'Maconha')->first();
         $meta = Drug::where('name', 'Metanfetamina')->first();
         $cocaina = Drug::where('name', 'Cocaína')->first();
@@ -19,29 +21,10 @@ class RobberySeeder extends Seeder
         $compMaconha = Component::where('drug_id', $maconha?->id)->first();
         $compMeta = Component::where('drug_id', $meta?->id)->first();
         $compCocaina = Component::where('drug_id', $cocaina?->id)->first();
-        $compHeroina = Component::where('drug_id', $heroina?->id)->first();
-
-        $allDrugs = function ($amount) use ($maconha, $meta, $cocaina, $heroina) {
-            return ($maconha && $meta && $cocaina && $heroina) ? [
-                ['drug_id' => $maconha->id, 'amount' => $amount],
-                ['drug_id' => $meta->id, 'amount' => $amount],
-                ['drug_id' => $cocaina->id, 'amount' => $amount],
-                ['drug_id' => $heroina->id, 'amount' => $amount],
-            ] : [];
-        };
-
-        $allComponents = function ($amount) use ($compMaconha, $compMeta, $compCocaina, $compHeroina) {
-            return ($compMaconha && $compMeta && $compCocaina && $compHeroina) ? [
-                ['component_id' => $compMaconha->id, 'amount' => $amount],
-                ['component_id' => $compMeta->id, 'amount' => $amount],
-                ['component_id' => $compCocaina->id, 'amount' => $amount],
-                ['component_id' => $compHeroina->id, 'amount' => $amount],
-            ] : [];
-        };
 
         $robberies = [
             [
-                'description' => 'Pedir esmola fingindo ser mudo',
+                'description' => 'Mendigar',
                 'required_power' => 3,
                 'required_stamina' => 10,
                 'type' => 'solo',
@@ -50,189 +33,108 @@ class RobberySeeder extends Seeder
                 'components' => [],
             ],
             [
-                'description' => 'Bater carteira de idosa na praça',
+                'description' => 'Bater Carteira',
                 'required_power' => 10,
                 'required_stamina' => 10,
                 'type' => 'solo',
-                'cash' => 150,
+                'cash' => 200,
                 'drugs' => [],
                 'components' => [],
             ],
             [
-                'description' => 'Roubar doce de criança',
-                'required_power' => 20,
-                'required_stamina' => 10,
-                'type' => 'solo',
-                'cash' => 300,
-                'drugs' => [],
-                'components' => [],
-            ],
-            [
-                'description' => 'Invadir horta e depósitos comunitários',
-                'required_power' => 45,
+                'description' => 'Roubar Padaria',
+                'required_power' => 40,
                 'required_stamina' => 15,
                 'type' => 'solo',
-                'cash' => 0,
-                'drugs' => $allDrugs(15),
-                'components' => [],
+                'cash' => 600,
+                'drugs' => $maconha ? [['drug_id' => $maconha->id, 'amount' => 2]] : [],
+                'components' => $compMaconha ? [['component_id' => $compMaconha->id, 'amount' => 1]] : [],
             ],
             [
-                'description' => 'Assaltar vendedor de cachorro-quente',
-                'required_power' => 70,
-                'required_stamina' => 15,
-                'type' => 'solo',
-                'cash' => 800,
-                'drugs' => [],
-                'components' => [],
-            ],
-            [
-                'description' => 'Roubar bicicletas de corrida na ciclovia',
-                'required_power' => 110,
+                'description' => 'Assaltar Posto',
+                'required_power' => 150,
                 'required_stamina' => 20,
                 'type' => 'solo',
                 'cash' => 1500,
-                'drugs' => [],
+                'drugs' => $maconha ? [['drug_id' => $maconha->id, 'amount' => 5]] : [],
                 'components' => [],
             ],
             [
-                'description' => 'Desviar insumos e fertilizantes do porto',
-                'required_power' => 160,
-                'required_stamina' => 20,
-                'type' => 'solo',
-                'cash' => 0,
-                'drugs' => [],
-                'components' => $allComponents(25),
-            ],
-            [
-                'description' => 'Arrombar caixa eletrônico de posto de gasolina',
-                'required_power' => 260,
+                'description' => 'Roubar Carro',
+                'required_power' => 500,
                 'required_stamina' => 25,
                 'type' => 'solo',
                 'cash' => 4500,
-                'drugs' => [],
-                'components' => [],
+                'drugs' => $meta ? [['drug_id' => $meta->id, 'amount' => 3]] : [],
+                'components' => $compMeta ? [['component_id' => $compMeta->id, 'amount' => 2]] : [],
             ],
             [
-                'description' => 'Saquear farmácia de manipulação no centro',
-                'required_power' => 420,
-                'required_stamina' => 25,
-                'type' => 'solo',
-                'cash' => 0,
-                'drugs' => $allDrugs(10),
-                'components' => [],
-            ],
-            [
-                'description' => 'Assaltar mercadinho de bairro no fim do expediente',
-                'required_power' => 650,
+                'description' => 'Invadir Mansão',
+                'required_power' => 1500,
                 'required_stamina' => 30,
                 'type' => 'solo',
-                'cash' => 9000,
-                'drugs' => [],
+                'cash' => 12000,
+                'drugs' => $cocaina ? [['drug_id' => $cocaina->id, 'amount' => 5]] : [],
                 'components' => [],
             ],
             [
-                'description' => 'Contrabandear precursores químicos importados',
-                'required_power' => 950,
-                'required_stamina' => 30,
-                'type' => 'solo',
-                'cash' => 0,
-                'drugs' => [],
-                'components' => $allComponents(15),
-            ],
-            [
-                'description' => 'Interceptar e roubar carreta de carga eletrônica',
-                'required_power' => 1400,
+                'description' => 'Assaltar Joalheria',
+                'required_power' => 4500,
                 'required_stamina' => 35,
-                'type' => 'solo',
-                'cash' => 18000,
-                'drugs' => [],
-                'components' => [],
-            ],
-            [
-                'description' => 'Saquear consultório de clínica médica privada',
-                'required_power' => 2000,
-                'required_stamina' => 35,
-                'type' => 'solo',
-                'cash' => 0,
-                'drugs' => $allDrugs(8),
-                'components' => [],
-            ],
-            [
-                'description' => 'Assaltar joalheria de shopping na calada da noite',
-                'required_power' => 2800,
-                'required_stamina' => 40,
                 'type' => 'solo',
                 'cash' => 35000,
-                'drugs' => [],
-                'components' => [],
+                'drugs' => $cocaina ? [['drug_id' => $cocaina->id, 'amount' => 10]] : [],
+                'components' => $compCocaina ? [['component_id' => $compCocaina->id, 'amount' => 3]] : [],
             ],
             [
-                'description' => 'Desviar reagentes de laboratório de pesquisa federal',
-                'required_power' => 3800,
+                'description' => 'Seqüestrar Político',
+                'required_power' => 12000,
                 'required_stamina' => 40,
                 'type' => 'solo',
-                'cash' => 0,
+                'cash' => 100000,
                 'drugs' => [],
-                'components' => $allComponents(12),
+                'components' => [],
             ],
             [
-                'description' => 'Realizar sequestro relâmpago de grande empresário',
-                'required_power' => 5500,
+                'description' => 'Assaltar Banco',
+                'required_power' => 30000,
                 'required_stamina' => 45,
                 'type' => 'solo',
-                'cash' => 70000,
-                'drugs' => [],
+                'cash' => 300000,
+                'drugs' => $heroina ? [['drug_id' => $heroina->id, 'amount' => 8]] : [],
                 'components' => [],
             ],
             [
-                'description' => 'Roubar museu de arte histórica da capital',
-                'required_power' => 8000,
-                'required_stamina' => 45,
-                'type' => 'solo',
-                'cash' => 0,
-                'drugs' => $allDrugs(6),
-                'components' => [],
-            ],
-            [
-                'description' => 'Planejar e assaltar carro forte em plena rodovia',
-                'required_power' => 12000,
+                'description' => 'Roubar Cassino',
+                'required_power' => 80000,
                 'required_stamina' => 50,
                 'type' => 'solo',
-                'cash' => 150000,
+                'cash' => 800000,
                 'drugs' => [],
                 'components' => [],
             ],
             [
-                'description' => 'Infiltrar e saquear depósito químico militar',
-                'required_power' => 18000,
-                'required_stamina' => 50,
-                'type' => 'solo',
-                'cash' => 0,
-                'drugs' => [],
-                'components' => $allComponents(8),
-            ],
-            [
-                'description' => 'Assaltar a sede principal do Banco Central',
-                'required_power' => 28000,
+                'description' => 'Invadir Base Militar',
+                'required_power' => 200000,
                 'required_stamina' => 60,
                 'type' => 'solo',
-                'cash' => 500000,
+                'cash' => 2500000,
                 'drugs' => [],
                 'components' => [],
             ],
             [
-                'description' => 'Saquear o cofre de alta segurança da Reserva Federal',
-                'required_power' => 55000,
+                'description' => 'Assaltar Reserva Federal',
+                'required_power' => 500000,
                 'required_stamina' => 70,
                 'type' => 'solo',
-                'cash' => 1500000,
+                'cash' => 8000000,
                 'drugs' => [],
                 'components' => [],
             ],
         ];
 
-        foreach ($robberies as $r) {
-            Robbery::create($r);
+        foreach ($robberies as $robbery) {
+            Robbery::create($robbery);
         }
     }
 }

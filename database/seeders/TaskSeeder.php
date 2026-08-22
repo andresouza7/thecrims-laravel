@@ -16,7 +16,9 @@ class TaskSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Register new task-related GameParams
+
+
+        // 2. Register task-related GameParams
         $gps = [
             ['name' => 'single_robbery_count', 'type' => 'requirement'],
             ['name' => 'kills_count', 'type' => 'requirement'],
@@ -60,29 +62,33 @@ class TaskSeeder extends Seeder
             ]);
         });
 
-        // Fetch entities for dynamic parameter targets
+        // Fetch entities for dynamic targets
         $maconha = Drug::where('name', 'Maconha')->first();
-        $meta = Drug::where('name', 'Metanfetamina')->first();
+        $cerveja = Drug::where('name', 'Cerveja')->first();
+        $anfetamina = Drug::where('name', 'Anfetamina')->first();
+        $ecstasy = Drug::where('name', 'Ecstasy')->first();
         $cocaina = Drug::where('name', 'Cocaína')->first();
         $heroina = Drug::where('name', 'Heroína')->first();
 
         $compMaconha = Component::where('drug_id', $maconha?->id)->first();
-        $compMeta = Component::where('drug_id', $meta?->id)->first();
+        $compCerveja = Component::where('drug_id', $cerveja?->id)->first();
+        $compAnfetamina = Component::where('drug_id', $anfetamina?->id)->first();
+        $compEcstasy = Component::where('drug_id', $ecstasy?->id)->first();
         $compCocaina = Component::where('drug_id', $cocaina?->id)->first();
         $compHeroina = Component::where('drug_id', $heroina?->id)->first();
 
-        $equipments = Equipment::all();
-        $hookers = Hooker::all();
+        $taco = Equipment::where('name', 'Taco de Beisebol')->first();
+        $glock = Equipment::where('name', 'Pistola 9mm Glock')->first();
 
-        // 2. Define task categories
+        // 3. Define the 5 task categories with linear progression
         $categories = [
             [
-                'name' => 'Iniciante no Crime',
-                'description' => 'Ideal para quem está começando a sujar as mãos nas ruas. Estas tarefas básicas ajudarão você a se orientar no submundo e adquirir o respeito inicial necessário para progredir.',
+                'name' => 'Primeiros Passos nas Ruas',
+                'description' => 'Aprenda o básico sobre cometer pequenos roubos, acumular respeito e negociar sua primeira droga.',
                 'tasks' => [
                     [
                         'name' => 'Pedinte das Sombras',
-                        'description' => 'Cometa roubos simples e de baixo risco para iniciar sua jornada criminosa nas ruas.',
+                        'description' => 'Realize seus primeiros assaltos de rua para chamar atenção básica.',
                         'requirements' => [
                             ['name' => 'single_robbery_count', 'value' => 5],
                         ],
@@ -92,11 +98,10 @@ class TaskSeeder extends Seeder
                         ],
                     ],
                     [
-                        'name' => 'Primeiro Troco',
-                        'description' => 'Acumule uma pequena quantidade de dinheiro vivo e continue realizando pequenos assaltos solo.',
+                        'name' => 'Dinheiro Fácil',
+                        'description' => 'Acumule uma carteira inicial de $2.000 em dinheiro vivo para investimentos.',
                         'requirements' => [
                             ['name' => 'cash', 'value' => 2000],
-                            ['name' => 'single_robbery_count', 'value' => 10],
                         ],
                         'rewards' => [
                             ['name' => 'cash', 'value' => 1000],
@@ -105,8 +110,8 @@ class TaskSeeder extends Seeder
                         ],
                     ],
                     [
-                        'name' => 'Olhos Abertos',
-                        'description' => 'Mostre que você está crescendo no submundo acumulando prestígio e respeito nas ruas.',
+                        'name' => 'Respeitado do Bairro',
+                        'description' => 'Alcance 50 de respeito para que os menores comecem a temer você.',
                         'requirements' => [
                             ['name' => 'respect', 'value' => 50],
                         ],
@@ -116,8 +121,8 @@ class TaskSeeder extends Seeder
                         ],
                     ],
                     [
-                        'name' => 'Pequeno Vendedor',
-                        'description' => 'Negocie e venda maconha em pequena escala para os viciados do quarteirão.',
+                        'name' => 'Pequeno Distribuidor',
+                        'description' => 'Venda pelo menos 15 unidades de maconha nas boates locais.',
                         'requirements' => [
                             ['name' => 'drug_sold', 'target_type' => Drug::class, 'target_id' => $maconha?->id, 'value' => 15],
                         ],
@@ -130,215 +135,213 @@ class TaskSeeder extends Seeder
                 ]
             ],
             [
-                'name' => 'Comerciante das Sombras',
-                'description' => 'O verdadeiro crime é financiado através do comércio de substâncias ilícitas. Gerencie suas vendas de drogas nas boates para enriquecer.',
+                'name' => 'Entrando no Negócio',
+                'description' => 'Comece a expandir seus horizontes contratando prostitutas e obtendo equipamentos mais confiáveis.',
                 'tasks' => [
                     [
-                        'name' => 'Química Básica',
-                        'description' => 'Venda metanfetamina para atrair clientes de classe média e elevar seus lucros de comércio.',
+                        'name' => 'Agenciador Novato',
+                        'description' => 'Hateie e contrate pelo menos 2 prostitutas para acumular renda passiva.',
                         'requirements' => [
-                            ['name' => 'drug_sold', 'target_type' => Drug::class, 'target_id' => $meta?->id, 'value' => 30],
+                            ['name' => 'hookers_count', 'value' => 2],
+                        ],
+                        'rewards' => [
+                            ['name' => 'cash', 'value' => 5000],
+                            ['name' => 'available_stats', 'value' => 25],
+                        ],
+                    ],
+                    [
+                        'name' => 'Cerveja Gelada',
+                        'description' => 'Distribua 30 garrafas de Cerveja na boate e comece a obter componentes de malte.',
+                        'requirements' => [
+                            ['name' => 'drug_sold', 'target_type' => Drug::class, 'target_id' => $cerveja?->id, 'value' => 30],
                         ],
                         'rewards' => [
                             ['name' => 'cash', 'value' => 8000],
                             ['name' => 'available_stats', 'value' => 30],
-                            ['name' => 'component_received', 'target_type' => Component::class, 'target_id' => $compMeta?->id, 'value' => 10],
+                            ['name' => 'component_received', 'target_type' => Component::class, 'target_id' => $compCerveja?->id, 'value' => 10],
                         ],
                     ],
                     [
-                        'name' => 'Capitalista do Tráfico',
-                        'description' => 'Acumule uma reserva financeira significativa e garanta o abastecimento contínuo de maconha.',
+                        'name' => 'Equipamento Próprio',
+                        'description' => 'Compre e possua um Taco de Beisebol no seu inventário para se proteger.',
                         'requirements' => [
-                            ['name' => 'cash', 'value' => 20000],
-                            ['name' => 'drug_sold', 'target_type' => Drug::class, 'target_id' => $maconha?->id, 'value' => 50],
+                            ['name' => 'equipment_owned', 'target_type' => Equipment::class, 'target_id' => $taco?->id, 'value' => 1],
                         ],
                         'rewards' => [
-                            ['name' => 'cash', 'value' => 12000],
+                            ['name' => 'cash', 'value' => 10000],
                             ['name' => 'available_stats', 'value' => 40],
                         ],
                     ],
                     [
-                        'name' => 'Preparo de Qualidade',
-                        'description' => 'Treine e aumente seu total acumulado de atributos para aguentar o ritmo frenético e as ameaças das ruas.',
+                        'name' => 'Condicionamento Físico',
+                        'description' => 'Melhore sua musculatura e mente acumulando um total de 150 pontos em atributos totais.',
                         'requirements' => [
-                            ['name' => 'stats_total', 'value' => 100],
-                        ],
-                        'rewards' => [
-                            ['name' => 'available_stats', 'value' => 50],
-                            ['name' => 'component_received', 'target_type' => Component::class, 'target_id' => $compMeta?->id, 'value' => 15],
-                        ],
-                    ],
-                    [
-                        'name' => 'Grande Negócio',
-                        'description' => 'Negocie e venda cocaína pura de alta qualidade para obter margens de lucro impressionantes.',
-                        'requirements' => [
-                            ['name' => 'drug_sold', 'target_type' => Drug::class, 'target_id' => $cocaina?->id, 'value' => 50],
-                        ],
-                        'rewards' => [
-                            ['name' => 'cash', 'value' => 25000],
-                            ['name' => 'available_stats', 'value' => 60],
-                            ['name' => 'drug_received', 'target_type' => Drug::class, 'target_id' => $cocaina?->id, 'value' => 15],
-                        ],
-                    ],
-                ]
-            ],
-            [
-                'name' => 'Dono das Ruas',
-                'description' => 'A noite pertence àqueles que controlam o prazer e cobram taxas pelo respeito. Expanda seu bordel e mostre quem gerencia os negócios de prostituição.',
-                'tasks' => [
-                    [
-                        'name' => 'Agenciador Iniciante',
-                        'description' => 'Contrate suas primeiras garotas de programa para trabalhar em seu território.',
-                        'requirements' => [
-                            ['name' => 'hookers_count', 'value' => 3],
+                            ['name' => 'stats_total', 'value' => 150],
                         ],
                         'rewards' => [
                             ['name' => 'cash', 'value' => 15000],
                             ['name' => 'available_stats', 'value' => 50],
                         ],
                     ],
+                ]
+            ],
+            [
+                'name' => 'Expandindo os Contatos',
+                'description' => 'Comércio de nível intermediário de drogas e estabelecimento de bordéis organizados nas ruas centrais.',
+                'tasks' => [
                     [
-                        'name' => 'Império do Prazer',
-                        'description' => 'Recrute garotas específicas e receba garotas de nível superior para o seu time.',
+                        'name' => 'Energético Químico',
+                        'description' => 'Comercialize 50 unidades de Anfetamina para atrair novos viciados.',
                         'requirements' => [
-                            ['name' => 'hooker_type_owned', 'target_type' => Hooker::class, 'target_id' => $hookers->first()?->id ?? 1, 'value' => 2],
+                            ['name' => 'drug_sold', 'target_type' => Drug::class, 'target_id' => $anfetamina?->id, 'value' => 50],
                         ],
                         'rewards' => [
-                            ['name' => 'cash', 'value' => 25000],
+                            ['name' => 'cash', 'value' => 20000],
                             ['name' => 'available_stats', 'value' => 60],
-                            ['name' => 'hooker_received', 'target_type' => Hooker::class, 'target_id' => $hookers->skip(1)->first()?->id ?? ($hookers->first()?->id ?? 1), 'value' => 1],
+                            ['name' => 'component_received', 'target_type' => Component::class, 'target_id' => $compAnfetamina?->id, 'value' => 15],
                         ],
                     ],
                     [
-                        'name' => 'Respeito das Ruas',
-                        'description' => 'Eleve substancialmente sua moral e prestígio no crime por meio do controle noturno.',
+                        'name' => 'Bordel do Centro',
+                        'description' => 'Tenha pelo menos 6 prostitutas contratadas em sua folha de pagamento.',
                         'requirements' => [
-                            ['name' => 'respect', 'value' => 500],
+                            ['name' => 'hookers_count', 'value' => 6],
                         ],
                         'rewards' => [
-                            ['name' => 'cash', 'value' => 40000],
+                            ['name' => 'cash', 'value' => 30000],
+                            ['name' => 'available_stats', 'value' => 70],
+                        ],
+                    ],
+                    [
+                        'name' => 'Reserva Segura',
+                        'description' => 'Acumule $100.000 em mãos para demonstrar sua liquidez comercial.',
+                        'requirements' => [
+                            ['name' => 'cash', 'value' => 100000],
+                        ],
+                        'rewards' => [
+                            ['name' => 'cash', 'value' => 50000],
                             ['name' => 'available_stats', 'value' => 80],
                         ],
                     ],
                     [
-                        'name' => 'Bordel Central',
-                        'description' => 'Construa uma rede imensa de prostituição com várias garotas sob a sua asa.',
+                        'name' => 'Veterano de Roubos',
+                        'description' => 'Complete um total de 40 assaltos com sucesso nas ruas da cidade.',
                         'requirements' => [
-                            ['name' => 'hookers_count', 'value' => 10],
+                            ['name' => 'single_robbery_count', 'value' => 40],
                         ],
                         'rewards' => [
                             ['name' => 'cash', 'value' => 60000],
                             ['name' => 'available_stats', 'value' => 100],
-                            ['name' => 'component_received', 'target_type' => Component::class, 'target_id' => $compCocaina?->id, 'value' => 20],
+                            ['name' => 'component_received', 'target_type' => Component::class, 'target_id' => $compEcstasy?->id, 'value' => 20],
                         ],
                     ],
                 ]
             ],
             [
-                'name' => 'Assassino de Aluguel',
-                'description' => 'Contratos de sangue exigem precisão. Elimine seus rivais em combates armados e garanta que você está usando os melhores equipamentos ativos do seu inventário.',
+                'name' => 'Mão de Ferro',
+                'description' => 'Combate ativo com gangues rivais e estabelecimento de armas de fogo de alto calibre.',
                 'tasks' => [
                     [
-                        'name' => 'Primeiro Sangue',
-                        'description' => 'Elimine seu primeiro rival na arena de batalha.',
+                        'name' => 'Aviso de Sangue',
+                        'description' => 'Mate 2 oponentes na arena para demonstrar que você não aceita desaforo.',
                         'requirements' => [
-                            ['name' => 'kills_count', 'value' => 1],
+                            ['name' => 'kills_count', 'value' => 2],
                         ],
                         'rewards' => [
-                            ['name' => 'cash', 'value' => 30000],
-                            ['name' => 'available_stats', 'value' => 80],
-                        ],
-                    ],
-                    [
-                        'name' => 'Preparado para Matar',
-                        'description' => 'Tenha um equipamento ativo específico (como arma ou armadura) equipado para aumentar suas chances de sucesso.',
-                        'requirements' => [
-                            ['name' => 'equipment_active', 'target_type' => Equipment::class, 'target_id' => $equipments->first()?->id ?? 1, 'value' => 1],
-                        ],
-                        'rewards' => [
-                            ['name' => 'cash', 'value' => 50000],
-                            ['name' => 'available_stats', 'value' => 100],
-                        ],
-                    ],
-                    [
-                        'name' => 'Força Bruta',
-                        'description' => 'Alcance um total considerável de força e inteligência para garantir a precisão de seus golpes.',
-                        'requirements' => [
-                            ['name' => 'stats_total', 'value' => 500],
-                        ],
-                        'rewards' => [
+                            ['name' => 'cash', 'value' => 80000],
                             ['name' => 'available_stats', 'value' => 120],
-                            ['name' => 'equipment_received', 'target_type' => Equipment::class, 'target_id' => $equipments->skip(1)->first()?->id ?? ($equipments->first()?->id ?? 1), 'value' => 1],
                         ],
                     ],
                     [
-                        'name' => 'Matador Profissional',
-                        'description' => 'Elimine múltiplos inimigos e torne-se temido nas ruas.',
+                        'name' => 'Glock Equipada',
+                        'description' => 'Mantenha a Pistola 9mm Glock ativa em seu inventário como sua arma principal.',
                         'requirements' => [
-                            ['name' => 'kills_count', 'value' => 4],
-                            ['name' => 'respect', 'value' => 1500],
+                            ['name' => 'equipment_active', 'target_type' => Equipment::class, 'target_id' => $glock?->id, 'value' => 1],
                         ],
                         'rewards' => [
-                            ['name' => 'cash', 'value' => 100000],
-                            ['name' => 'available_stats', 'value' => 150],
-                        ],
-                    ],
-                ]
-            ],
-            [
-                'name' => 'Lenda do Crime',
-                'description' => 'O ápice da pirâmide criminosa. Apenas os maiores assaltantes e traficantes com respeito absoluto alcançarão estas tarefas finais.',
-                'tasks' => [
-                    [
-                        'name' => 'Mestre dos Assaltos',
-                        'description' => 'Conclua dezenas de assaltos solo com êxito.',
-                        'requirements' => [
-                            ['name' => 'single_robbery_count', 'value' => 50],
-                        ],
-                        'rewards' => [
-                            ['name' => 'cash', 'value' => 100000],
+                            ['name' => 'cash', 'value' => 120000],
                             ['name' => 'available_stats', 'value' => 150],
                         ],
                     ],
                     [
-                        'name' => 'Distribuidor Lendário',
-                        'description' => 'Venda e distribua heroína de altíssima qualidade nas ruas da cidade.',
+                        'name' => 'Influência Pesada',
+                        'description' => 'Consolide sua influência alcançando 2.000 pontos de respeito total.',
                         'requirements' => [
-                            ['name' => 'drug_sold', 'target_type' => Drug::class, 'target_id' => $heroina?->id, 'value' => 50],
+                            ['name' => 'respect', 'value' => 2000],
                         ],
                         'rewards' => [
                             ['name' => 'cash', 'value' => 200000],
                             ['name' => 'available_stats', 'value' => 200],
-                            ['name' => 'component_received', 'target_type' => Component::class, 'target_id' => $compHeroina?->id, 'value' => 30],
                         ],
                     ],
                     [
-                        'name' => 'Poder Supremo',
-                        'description' => 'Treine até que seu corpo e mente atinjam níveis extraordinários.',
+                        'name' => 'Distribuição Fina',
+                        'description' => 'Comercialize 100 gramas de cocaína pura nas boates para obter componentes químicos.',
                         'requirements' => [
-                            ['name' => 'stats_total', 'value' => 2000],
+                            ['name' => 'drug_sold', 'target_type' => Drug::class, 'target_id' => $cocaina?->id, 'value' => 100],
                         ],
                         'rewards' => [
+                            ['name' => 'cash', 'value' => 300000],
                             ['name' => 'available_stats', 'value' => 250],
+                            ['name' => 'component_received', 'target_type' => Component::class, 'target_id' => $compCocaina?->id, 'value' => 50],
                         ],
                     ],
+                ]
+            ],
+            [
+                'name' => 'Império Consolidado',
+                'description' => 'O topo absoluto do submundo. Exige a conclusão de grandes golpes e impérios de fábricas.',
+                'tasks' => [
                     [
-                        'name' => 'Chefão Inquestionável',
-                        'description' => 'Acumule uma fortuna em dinheiro e respeito máximo para consolidar seu reinado absoluto.',
+                        'name' => 'Assaltante Profissional',
+                        'description' => 'Conclua 150 assaltos solo com maestria absoluta.',
                         'requirements' => [
-                            ['name' => 'cash', 'value' => 1000000],
-                            ['name' => 'respect', 'value' => 5000],
+                            ['name' => 'single_robbery_count', 'value' => 150],
                         ],
                         'rewards' => [
                             ['name' => 'cash', 'value' => 500000],
                             ['name' => 'available_stats', 'value' => 300],
                         ],
                     ],
+                    [
+                        'name' => 'Tráfico de Elite',
+                        'description' => 'Venda 150 unidades de Heroína para os viciados mais ricos da cidade.',
+                        'requirements' => [
+                            ['name' => 'drug_sold', 'target_type' => Drug::class, 'target_id' => $heroina?->id, 'value' => 150],
+                        ],
+                        'rewards' => [
+                            ['name' => 'cash', 'value' => 1000000],
+                            ['name' => 'available_stats', 'value' => 400],
+                            ['name' => 'component_received', 'target_type' => Component::class, 'target_id' => $compHeroina?->id, 'value' => 100],
+                        ],
+                    ],
+                    [
+                        'name' => 'Matador de Aluguel',
+                        'description' => 'Colete a recompensa por matar 10 oponentes em lutas mortais.',
+                        'requirements' => [
+                            ['name' => 'kills_count', 'value' => 10],
+                        ],
+                        'rewards' => [
+                            ['name' => 'cash', 'value' => 2000000],
+                            ['name' => 'available_stats', 'value' => 500],
+                        ],
+                    ],
+                    [
+                        'name' => 'Império Lendário',
+                        'description' => 'Acumule $10.000.000 em dinheiro vivo para coroar sua lenda.',
+                        'requirements' => [
+                            ['name' => 'cash', 'value' => 10000000],
+                        ],
+                        'rewards' => [
+                            ['name' => 'cash', 'value' => 5000000],
+                            ['name' => 'available_stats', 'value' => 1000],
+                        ],
+                    ],
                 ]
             ],
         ];
 
-        // 3. Insert categories, tasks, and task parameters
+        // 4. Insert categories, tasks, and task parameters
         foreach ($categories as $catIndex => $catData) {
             $category = TaskCategory::create([
                 'name' => $catData['name'],

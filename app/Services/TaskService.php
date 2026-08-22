@@ -82,33 +82,14 @@ class TaskService
         $completed = $current >= $total;
         $progress = min(100, (int) round(($current / max(1, $total)) * 100));
 
-        $displayName = $param->name;
+        $displayName = \App\Enums\GameParamType::getLabel($param->name);
         if ($target) {
             $displayName .= " (" . ($target->name ?? 'Item') . ")";
         }
 
-        // Translating technical param names to user friendly names for display
-        $friendlyNames = [
-            'cash' => 'Dinheiro',
-            'respect' => 'Respeito',
-            'hookers_count' => 'Total de Prostitutas',
-            'stats_total' => 'Total de Atributos',
-            'drug_sold' => 'Drogas Vendidas',
-            'equipment_owned' => 'Possuir Equipamento',
-            'equipment_active' => 'Equipamento Ativo',
-            'hooker_type_owned' => 'Possuir Prostituta específica',
-            'single_robbery_count' => 'Roubos Solo com Sucesso',
-            'kills_count' => 'Assassinatos de Jogadores (Kills)',
-        ];
-
-        $friendlyName = $friendlyNames[$param->name] ?? $displayName;
-        if ($target && isset($friendlyNames[$param->name])) {
-            $friendlyName .= " (" . ($target->name ?? 'Item') . ")";
-        }
-
         return [
             'id' => $tp->id,
-            'name' => $friendlyName,
+            'name' => $displayName,
             'param_name' => $param->name,
             'current' => $current,
             'total' => $total,

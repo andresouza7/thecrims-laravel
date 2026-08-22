@@ -36,7 +36,7 @@ class TaskSystemTest extends TestCase
         $this->assertEquals(20, Task::count()); // 5 categories * 4 tasks
 
         $firstCategory = TaskCategory::first();
-        $this->assertEquals('Iniciante no Crime', $firstCategory->name);
+        $this->assertEquals('Primeiros Passos nas Ruas', $firstCategory->name);
         $this->assertEquals(4, $firstCategory->tasks()->count());
     }
 
