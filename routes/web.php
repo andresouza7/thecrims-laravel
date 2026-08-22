@@ -15,6 +15,7 @@ use App\Livewire\Game\Lab as GameLab;
 use App\Livewire\Game\Market\Index as GameMarketIndex;
 use App\Livewire\Game\Nightclub as GameNightclub;
 use App\Livewire\Game\Robbery as GameRobbery;
+use App\Livewire\Game\Street as GameStreet;
 use App\Services\GameService;
 use Illuminate\Support\Facades\Route;
 
@@ -79,6 +80,10 @@ Route::prefix('inventory')->group(function () {
 Route::prefix('career')->group(function() {
     Route::get('/', GameCareerAbout::class)->name('career.index');
     Route::get('/about', GameCareerAbout::class)->name('career.about');
+});
+
+Route::prefix('street')->group(function () {
+    Route::get('/', GameStreet::class)->name('street.index');
 });
 
 Route::get('dashboard', GameHome::class)->middleware(['auth', 'verified'])->name('dashboard');

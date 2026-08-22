@@ -24,6 +24,7 @@ return new class extends Migration
 
             $table->foreignId('career_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('career_level_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('active_task_category_id')->nullable()->constrained('task_categories')->nullOnDelete();
             $table->unsignedBigInteger('cash')->default(0);
             $table->unsignedBigInteger('bank')->default(0);
             $table->integer('health')->default(0);

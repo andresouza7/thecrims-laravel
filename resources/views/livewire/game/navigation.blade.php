@@ -135,6 +135,18 @@
         </span>
     @endif
 
+    <!-- O Beco -->
+    @if ($user?->canAccessPath('street'))
+        <a href="{{ route('street.index') }}" wire:navigate.hover
+            class="px-3 py-1.5 rounded transition {{ request()->routeIs('street.*') ? 'bg-indigo-600 text-white font-semibold' : 'text-gray-300 hover:bg-gray-800 hover:text-white' }}">
+            O Beco
+        </a>
+    @else
+        <span class="px-3 py-1.5 rounded text-gray-500 opacity-40 cursor-not-allowed select-none flex items-center gap-1 bg-gray-950/40 border border-transparent">
+            O Beco 🔒
+        </span>
+    @endif
+
 
 
     <!-- Admin -->

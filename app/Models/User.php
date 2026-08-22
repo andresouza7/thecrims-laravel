@@ -27,6 +27,7 @@ class User extends Authenticatable
         'password',
         'career_id',
         'career_level_id',
+        'active_task_category_id',
     ];
 
     /**
@@ -49,6 +50,8 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'jail_end_time' => 'datetime',
+            'hospital_end_time' => 'datetime',
         ];
     }
 
@@ -74,6 +77,16 @@ class User extends Authenticatable
     public function careerLevel()
     {
         return $this->belongsTo(CareerLevel::class, 'career_level_id');
+    }
+
+    public function completedTasks()
+    {
+        return $this->belongsToMany(Task::class, 'user_completed_tasks', 'user_id', 'task_id');
+    }
+
+    public function activeTaskCategory()
+    {
+        return $this->belongsTo(TaskCategory::class, 'active_task_category_id');
     }
 
     public function components()

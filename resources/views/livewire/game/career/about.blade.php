@@ -12,9 +12,51 @@
             </div>
         @endif
     </div>
+    @if ($user->available_stats > 0)
+        <div class="p-5 bg-gradient-to-r from-indigo-950/20 to-gray-900 border border-indigo-500/30 rounded-xl space-y-4 shadow-lg shadow-indigo-950/20">
+            <div>
+                <h4 class="text-base font-bold text-indigo-400 flex items-center gap-1.5">
+                    <span>⚡</span> Distribuir Atributos Livres
+                </h4>
+                <p class="text-xs text-gray-400 mt-0.5">Você possui pontos de atributos livres recebidos das tarefas do Beco. Distribua-os para fortalecer seu personagem!</p>
+            </div>
 
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 bg-gray-950/50 p-4 rounded-lg border border-gray-850">
+                <!-- Available stats label -->
+                <div class="flex-1">
+                    <span class="text-xs text-gray-400 uppercase tracking-wider block font-bold text-[10px]">Pontos Disponíveis</span>
+                    <span class="text-2xl font-black text-emerald-400">{{ number_format($user->available_stats) }}</span>
+                </div>
 
+                <!-- Allocation controls form -->
+                <form wire:submit.prevent="distributeStats" class="flex flex-wrap items-center gap-3">
+                    <div class="flex flex-col gap-1">
+                        <label for="statToAllocate" class="text-[10px] text-gray-400 font-bold uppercase">Atributo</label>
+                        <select wire:model="statToAllocate" id="statToAllocate"
+                                class="p-2 bg-gray-900 border border-gray-800 rounded-lg text-xs text-white focus:border-indigo-500 focus:outline-none w-40">
+                            <option value="strength">Força</option>
+                            <option value="intelligence">Inteligência</option>
+                            <option value="charisma">Carisma</option>
+                            <option value="tolerance">Tolerância</option>
+                        </select>
+                    </div>
 
+                    <div class="flex flex-col gap-1">
+                        <label for="statQuantity" class="text-[10px] text-gray-400 font-bold uppercase">Quantidade</label>
+                        <input type="number" wire:model="statQuantity" id="statQuantity" min="1" max="{{ $user->available_stats }}"
+                               class="p-2 bg-gray-905 border border-gray-800 rounded-lg text-xs text-white focus:border-indigo-500 focus:outline-none w-24">
+                    </div>
+
+                    <div class="pt-4">
+                        <button type="submit"
+                                class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg text-xs transition duration-200 cursor-pointer shadow-md shadow-indigo-950/40">
+                            Distribuir Pontos
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    @endif
     @if ($userCareer)
         <div class="p-5 bg-gray-900 border border-gray-800 rounded-xl space-y-6">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gray-800/60 p-4 rounded-lg border border-gray-700/50">

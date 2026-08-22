@@ -6,6 +6,7 @@ use App\Models\Career as CareerModel;
 use App\Models\CareerLevel;
 use App\Services\CareerService;
 use App\Services\GameFacade;
+use App\Services\TaskService;
 use Livewire\Component;
 
 class About extends Component
@@ -13,6 +14,8 @@ class About extends Component
     protected $listeners = ['user-stats-updated' => '$refresh'];
 
     public $selectedCareerId;
+    public $statToAllocate = 'strength';
+    public $statQuantity = 1;
 
     public function mount(GameFacade $game)
     {
@@ -48,6 +51,23 @@ class About extends Component
             $careerService->levelUp($game->user);
             $this->dispatch('user-stats-updated');
             $this->dispatch('toast', type: 'success', message: 'Parabéns! Você subiu de nível na sua carreira e recebeu suas recompensas!');
+        } catch (\Throwable $th) {
+            $this->dispatch('toast', type: 'error', message: $th->getMessage());
+        }
+    }
+
+    public function distributeStats(GameFacade $game, TaskService $taskService)
+    {
+        $this->validate([
+            'statToAllocate' => 'required|in:strength,intelligence,charisma,tolerance',
+            'statQuantity' => 'required|integer|min:1',
+        ]);
+
+        try {
+            $taskService->allocateStats($game->user, $this->statToAllocate, (int)$this->statQuantity);
+            $this->dispatch('user-stats-updated');
+            $this->dispatch('toast', type: 'success', message: 'Atributos distribuídos com sucesso!');
+            $this->statQuantity = 1;
         } catch (\Throwable $th) {
             $this->dispatch('toast', type: 'error', message: $th->getMessage());
         }
